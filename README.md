@@ -64,7 +64,7 @@ aiki/
 
 1. **Clone the repository**
 ```bash
-cd /home/lawson/Desktop/projects/AIKI
+git https://github.com/Lawsonredeye/AIKI.git
 ```
 
 2. **Install development tools**
