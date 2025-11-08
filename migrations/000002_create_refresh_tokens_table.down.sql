@@ -1,0 +1,7 @@
+-- Drop indexes
+DROP INDEX IF EXISTS idx_refresh_tokens_expires_at;
+DROP INDEX IF EXISTS idx_refresh_tokens_token;
+DROP INDEX IF EXISTS idx_refresh_tokens_user_id;
+
+-- Drop table
+DROP TABLE IF EXISTS refresh_tokens;

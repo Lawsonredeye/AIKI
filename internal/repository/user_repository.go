@@ -1,0 +1,216 @@
+package repository
+
+import (
+	"context"
+	"errors"
+	"time"
+
+	"aiki/internal/domain"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+)
+
+//go:generate mockgen -source=user_repository.go -destination=mocks/mock_user_repository.go -package=mocks
+
+type UserRepository interface {
+	Create(ctx context.Context, user *domain.User, password string) (*domain.User, error)
+	GetByID(ctx context.Context, id int32) (*domain.User, error)
+	GetByEmail(ctx context.Context, email string) (*domain.User, error)
+	Update(ctx context.Context, id int32, firstName, lastName *string, phoneNumber *string) (*domain.User, error)
+	EmailExists(ctx context.Context, email string) (bool, error)
+	CreateRefreshToken(ctx context.Context, userID int32, token string, expiresAt time.Time) error
+	GetRefreshToken(ctx context.Context, token string) (int32, error)
+	DeleteRefreshToken(ctx context.Context, token string) error
+	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
+}
+
+type userRepository struct {
+	db *pgxpool.Pool
+}
+
+func NewUserRepository(db *pgxpool.Pool) UserRepository {
+	return &userRepository{db: db}
+}
+
+func (r *userRepository) Create(ctx context.Context, user *domain.User, passwordHash string) (*domain.User, error) {
+	query := `
+		INSERT INTO users (first_name, last_name, email, phone_number, password_hash)
+		VALUES ($1, $2, $3, $4, $5)
+		RETURNING id, first_name, last_name, email, phone_number, is_active, created_at, updated_at
+	`
+
+	var createdUser domain.User
+	err := r.db.QueryRow(ctx, query,
+		user.FirstName,
+		user.LastName,
+		user.Email,
+		user.PhoneNumber,
+		passwordHash,
+	).Scan(
+		&createdUser.ID,
+		&createdUser.FirstName,
+		&createdUser.LastName,
+		&createdUser.Email,
+		&createdUser.PhoneNumber,
+		&createdUser.IsActive,
+		&createdUser.CreatedAt,
+		&createdUser.UpdatedAt,
+	)
+
+	if err != nil {
+		// Check for unique constraint violation on email
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserAlreadyExists
+		}
+		return nil, err
+	}
+
+	return &createdUser, nil
+}
+
+func (r *userRepository) GetByID(ctx context.Context, id int32) (*domain.User, error) {
+	query := `
+		SELECT id, first_name, last_name, email, phone_number, password_hash, is_active, created_at, updated_at
+		FROM users
+		WHERE id = $1 AND is_active = TRUE
+	`
+
+	var user domain.User
+	err := r.db.QueryRow(ctx, query, id).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.PasswordHash,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
+	query := `
+		SELECT id, first_name, last_name, email, phone_number, password_hash, is_active, created_at, updated_at
+		FROM users
+		WHERE email = $1 AND is_active = TRUE
+	`
+
+	var user domain.User
+	err := r.db.QueryRow(ctx, query, email).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.PasswordHash,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) Update(ctx context.Context, id int32, firstName, lastName *string, phoneNumber *string) (*domain.User, error) {
+	query := `
+		UPDATE users
+		SET
+			first_name = COALESCE($2, first_name),
+			last_name = COALESCE($3, last_name),
+			phone_number = COALESCE($4, phone_number),
+			updated_at = NOW()
+		WHERE id = $1 AND is_active = TRUE
+		RETURNING id, first_name, last_name, email, phone_number, is_active, created_at, updated_at
+	`
+
+	var user domain.User
+	err := r.db.QueryRow(ctx, query, id, firstName, lastName, phoneNumber).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) EmailExists(ctx context.Context, email string) (bool, error) {
+	query := `SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)`
+
+	var exists bool
+	err := r.db.QueryRow(ctx, query, email).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func (r *userRepository) CreateRefreshToken(ctx context.Context, userID int32, token string, expiresAt time.Time) error {
+	query := `
+		INSERT INTO refresh_tokens (user_id, token, expires_at)
+		VALUES ($1, $2, $3)
+	`
+
+	_, err := r.db.Exec(ctx, query, userID, token, expiresAt)
+	return err
+}
+
+func (r *userRepository) GetRefreshToken(ctx context.Context, token string) (int32, error) {
+	query := `
+		SELECT user_id FROM refresh_tokens
+		WHERE token = $1 AND expires_at > NOW()
+	`
+
+	var userID int32
+	err := r.db.QueryRow(ctx, query, token).Scan(&userID)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return 0, domain.ErrInvalidToken
+		}
+		return 0, err
+	}
+
+	return userID, nil
+}
+
+func (r *userRepository) DeleteRefreshToken(ctx context.Context, token string) error {
+	query := `DELETE FROM refresh_tokens WHERE token = $1`
+	_, err := r.db.Exec(ctx, query, token)
+	return err
+}
+
+func (r *userRepository) DeleteUserRefreshTokens(ctx context.Context, userID int32) error {
+	query := `DELETE FROM refresh_tokens WHERE user_id = $1`
+	_, err := r.db.Exec(ctx, query, userID)
+	return err
+}
