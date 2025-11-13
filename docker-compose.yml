@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:16-alpine
@@ -22,7 +20,7 @@ services:
     image: redis:7-alpine
     container_name: aiki-redis
     ports:
-      - "6379:6379"
+      - "6370:6379"
     volumes:
       - redis_data:/data
     healthcheck:
