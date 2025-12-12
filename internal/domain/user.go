@@ -9,7 +9,8 @@ type User struct {
 	LastName     string    `json:"last_name"`
 	Email        string    `json:"email"`
 	PhoneNumber  *string   `json:"phone_number,omitempty"`
-	PasswordHash string    `json:"-"` // Never expose password hash
+	PasswordHash *string   `json:"-"`                     // Never expose password hash, now nullable
+	LinkedInID   *string   `json:"linkedin_id,omitempty"` // Nullable LinkedIn ID
 	IsActive     bool      `json:"is_active"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
@@ -47,4 +48,18 @@ type UpdateUserRequest struct {
 	FirstName   *string `json:"first_name,omitempty" validate:"omitempty,min=2,max=100"`
 	LastName    *string `json:"last_name,omitempty" validate:"omitempty,min=2,max=100"`
 	PhoneNumber *string `json:"phone_number,omitempty" validate:"omitempty,min=10,max=20"`
+}
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" validate:"required,email"`
+}
+
+type ValidateForgotPasswordOTP struct {
+	SessionId string `json:"session_id" validate:"required"`
+	Otp       string `json:"otp" validate:"required"`
+}
+
+type ResetPasswordRequest struct {
+	NewPassword string `json:"new_password" validate:"required,min=8,max=100"`
+	SessionId   string `json:"session_id" validate:"required"`
 }

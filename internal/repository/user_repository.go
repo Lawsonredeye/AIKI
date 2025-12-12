@@ -23,6 +23,7 @@ type UserRepository interface {
 	GetRefreshToken(ctx context.Context, token string) (int32, error)
 	DeleteRefreshToken(ctx context.Context, token string) error
 	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
+	UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error
 }
 
 type userRepository struct {
@@ -212,5 +213,16 @@ func (r *userRepository) DeleteRefreshToken(ctx context.Context, token string) e
 func (r *userRepository) DeleteUserRefreshTokens(ctx context.Context, userID int32) error {
 	query := `DELETE FROM refresh_tokens WHERE user_id = $1`
 	_, err := r.db.Exec(ctx, query, userID)
+	return err
+}
+
+func (r *userRepository) UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error {
+	query := `
+		UPDATE users
+		SET password_hash = $2, updated_at = NOW()
+		WHERE id = $1 AND is_active = TRUE
+	`
+
+	_, err := r.db.Exec(ctx, query, userID, newPasswordHash)
 	return err
 }

@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var passwd = "should-not-be-returned"
+
 func TestUserService_GetByID(t *testing.T) {
 	mockRepo := new(MockUserRepository)
 	service := NewUserService(mockRepo)
@@ -23,7 +25,7 @@ func TestUserService_GetByID(t *testing.T) {
 			FirstName:    "John",
 			LastName:     "Doe",
 			Email:        "john@example.com",
-			PasswordHash: "should-not-be-returned",
+			PasswordHash: &passwd,
 			IsActive:     true,
 			CreatedAt:    time.Now(),
 			UpdatedAt:    time.Now(),
@@ -65,7 +67,7 @@ func TestUserService_GetByEmail(t *testing.T) {
 			FirstName:    "John",
 			LastName:     "Doe",
 			Email:        email,
-			PasswordHash: "should-not-be-returned",
+			PasswordHash: &passwd,
 			IsActive:     true,
 		}
 
@@ -114,7 +116,7 @@ func TestUserService_Update(t *testing.T) {
 			LastName:     "Doe",
 			Email:        "jane@example.com",
 			PhoneNumber:  &newPhone,
-			PasswordHash: "should-not-be-returned",
+			PasswordHash: &passwd,
 			IsActive:     true,
 		}
 
