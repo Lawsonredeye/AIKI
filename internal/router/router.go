@@ -33,6 +33,10 @@ func Setup(
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/refresh", authHandler.RefreshToken)
 		auth.POST("/logout", authHandler.Logout)
+		auth.GET("/linkedin/login", authHandler.LinkedInLogin) // New LinkedIn login route
+		// auth.GET("/linkedin/callback", authHandler.LinkedInCallback) // TODO: add New LinkedIn callback route
+		auth.POST("/forgot-password", authHandler.ForgottenPassword)
+		auth.POST("/forgot-password/validate", authHandler.ValidateForgottenPasswordOTP)
 	}
 
 	// User routes (auth required)

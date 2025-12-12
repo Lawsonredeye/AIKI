@@ -70,7 +70,7 @@ func main() {
 	e.Use(middleware.CORS())
 
 	// Initialize handlers
-	authHandler := handler.NewAuthHandler(authService, e.Validator)
+	authHandler := handler.NewAuthHandler(authService, e.Validator, redis)
 	userHandler := handler.NewUserHandler(userService, e.Validator)
 
 	// Setup routes
