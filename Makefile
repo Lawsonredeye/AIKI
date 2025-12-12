@@ -39,13 +39,13 @@ run: ## Run the application
 	@go run cmd/api/main.go
 
 docker-up: ## Start docker containers
-	@docker-compose up -d
+	@docker compose up -d
 
 docker-down: ## Stop docker containers
-	@docker-compose down
+	@docker compose down
 
 docker-logs: ## Show docker logs
-	@docker-compose logs -f
+	@docker compose logs -f
 
 clean: ## Clean build artifacts
 	@rm -f coverage.out coverage.html
