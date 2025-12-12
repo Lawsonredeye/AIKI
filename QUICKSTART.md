@@ -9,7 +9,8 @@
 
 ### 1. Start Database Services
 ```bash
-docker-compose up -d
+docker-compose up -d # if you use v1
+docker compose up -d # if you use v2
 ```
 
 This starts PostgreSQL and Redis in the background.
