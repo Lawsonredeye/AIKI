@@ -32,3 +32,7 @@ func NewRedisClient(cfg *config.RedisConfig) (*redis.Client, error) {
 
 	return client, nil
 }
+
+//func PrepareData() interface{} {
+//	return
+//}

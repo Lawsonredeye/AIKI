@@ -32,7 +32,7 @@ func (s *userService) GetByID(ctx context.Context, id int32) (*domain.User, erro
 	}
 
 	// Don't return password hash
-	user.PasswordHash = ""
+	user.PasswordHash = nil
 	return user, nil
 }
 
@@ -43,7 +43,7 @@ func (s *userService) GetByEmail(ctx context.Context, email string) (*domain.Use
 	}
 
 	// Don't return password hash
-	user.PasswordHash = ""
+	user.PasswordHash = nil
 	return user, nil
 }
 
@@ -54,6 +54,6 @@ func (s *userService) Update(ctx context.Context, id int32, req *domain.UpdateUs
 	}
 
 	// Don't return password hash
-	user.PasswordHash = ""
+	user.PasswordHash = nil
 	return user, nil
 }
