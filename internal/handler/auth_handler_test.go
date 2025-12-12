@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"aiki/internal/database"
 	"bytes"
 	"context"
 	"encoding/json"
@@ -8,6 +9,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"aiki/internal/config"
 	"aiki/internal/domain"
 	"aiki/internal/pkg/validator"
 
@@ -22,12 +24,25 @@ type MockAuthService struct {
 	mock.Mock
 }
 
+func (m *MockAuthService) ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error {
+	//TODO implement me
+	return nil
+}
+
 func (m *MockAuthService) Register(ctx context.Context, req *domain.RegisterRequest) (*domain.AuthResponse, error) {
 	args := m.Called(ctx, req)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
 	return args.Get(0).(*domain.AuthResponse), args.Error(1)
+}
+
+func (m *MockAuthService) ForgottenPassword(ctx context.Context, req *domain.ForgotPasswordRequest) (string, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return "", args.Error(1)
+	}
+	return args.Get(0).(string), args.Error(1)
 }
 
 func (m *MockAuthService) Login(ctx context.Context, req *domain.LoginRequest) (*domain.AuthResponse, error) {
@@ -60,7 +75,14 @@ func setupEcho() *echo.Echo {
 func TestAuthHandler_Register(t *testing.T) {
 	e := setupEcho()
 	mockService := new(MockAuthService)
-	handler := NewAuthHandler(mockService, e.Validator)
+	//cfg := new(config.Config)
+	redisCache, _ := database.NewRedisClient(&config.RedisConfig{
+		Host:     "127.0.0.1",
+		Password: "",
+		DB:       0,
+		Port:     "6379",
+	})
+	handler := NewAuthHandler(mockService, e.Validator, redisCache)
 
 	t.Run("successful registration", func(t *testing.T) {
 		reqBody := domain.RegisterRequest{
@@ -131,7 +153,13 @@ func TestAuthHandler_Register(t *testing.T) {
 func TestAuthHandler_Login(t *testing.T) {
 	e := setupEcho()
 	mockService := new(MockAuthService)
-	handler := NewAuthHandler(mockService, e.Validator)
+	redisCache, _ := database.NewRedisClient(&config.RedisConfig{
+		Host:     "127.0.0.1",
+		Password: "",
+		DB:       0,
+		Port:     "6379",
+	})
+	handler := NewAuthHandler(mockService, e.Validator, redisCache)
 
 	t.Run("successful login", func(t *testing.T) {
 		reqBody := domain.LoginRequest{
@@ -190,7 +218,13 @@ func TestAuthHandler_Login(t *testing.T) {
 func TestAuthHandler_RefreshToken(t *testing.T) {
 	e := setupEcho()
 	mockService := new(MockAuthService)
-	handler := NewAuthHandler(mockService, e.Validator)
+	redisCache, _ := database.NewRedisClient(&config.RedisConfig{
+		Host:     "127.0.0.1",
+		Password: "",
+		DB:       0,
+		Port:     "6379",
+	})
+	handler := NewAuthHandler(mockService, e.Validator, redisCache)
 
 	t.Run("successful token refresh", func(t *testing.T) {
 		reqBody := domain.RefreshTokenRequest{
@@ -222,7 +256,13 @@ func TestAuthHandler_RefreshToken(t *testing.T) {
 func TestAuthHandler_Logout(t *testing.T) {
 	e := setupEcho()
 	mockService := new(MockAuthService)
-	handler := NewAuthHandler(mockService, e.Validator)
+	redisCache, _ := database.NewRedisClient(&config.RedisConfig{
+		Host:     "127.0.0.1",
+		Password: "",
+		DB:       0,
+		Port:     "6379",
+	})
+	handler := NewAuthHandler(mockService, e.Validator, redisCache)
 
 	t.Run("successful logout", func(t *testing.T) {
 		reqBody := domain.RefreshTokenRequest{

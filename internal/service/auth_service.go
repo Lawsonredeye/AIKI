@@ -17,6 +17,8 @@ type AuthService interface {
 	Login(ctx context.Context, req *domain.LoginRequest) (*domain.AuthResponse, error)
 	RefreshToken(ctx context.Context, refreshToken string) (*domain.AuthResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
+	ForgottenPassword(ctx context.Context, req *domain.ForgotPasswordRequest) (string, error)
+	ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error
 }
 
 type authService struct {
@@ -97,7 +99,7 @@ func (s *authService) Login(ctx context.Context, req *domain.LoginRequest) (*dom
 	}
 
 	// Verify password
-	if err := password.Compare(user.PasswordHash, req.Password); err != nil {
+	if err := password.Compare(*user.PasswordHash, req.Password); err != nil {
 		return nil, domain.ErrInvalidCredentials
 	}
 
@@ -120,7 +122,7 @@ func (s *authService) Login(ctx context.Context, req *domain.LoginRequest) (*dom
 	}
 
 	// Don't return password hash
-	user.PasswordHash = ""
+	user.PasswordHash = nil
 
 	return &domain.AuthResponse{
 		AccessToken:  accessToken,
@@ -162,7 +164,7 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*d
 	}
 
 	// Don't return password hash
-	user.PasswordHash = ""
+	user.PasswordHash = nil
 
 	return &domain.AuthResponse{
 		AccessToken:  accessToken,
@@ -173,4 +175,19 @@ func (s *authService) RefreshToken(ctx context.Context, refreshToken string) (*d
 
 func (s *authService) Logout(ctx context.Context, refreshToken string) error {
 	return s.userRepo.DeleteRefreshToken(ctx, refreshToken)
+}
+
+func (s *authService) ForgottenPassword(ctx context.Context, req *domain.ForgotPasswordRequest) (string, error) {
+	user, err := s.userRepo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		return "", err
+	}
+	// TODO: implement sending token to email
+	return user.Email, nil
+}
+
+func (s *authService) ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error {
+	//user, err := s.userRepo.GetByEmail(ctx)
+	//s.userRepo.UpdateUserPassword(ctx, user.ID, req.NewPassword)
+	return nil
 }
