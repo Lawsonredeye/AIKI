@@ -37,6 +37,7 @@ func Setup(
 		// auth.GET("/linkedin/callback", authHandler.LinkedInCallback) // TODO: add New LinkedIn callback route
 		auth.POST("/forgot-password", authHandler.ForgottenPassword)
 		auth.POST("/forgot-password/validate", authHandler.ValidateForgottenPasswordOTP)
+		auth.POST("/reset-password", authHandler.ResetPassword)
 	}
 
 	// User routes (auth required)
