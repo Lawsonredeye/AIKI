@@ -241,7 +241,7 @@ func (h *AuthHandler) ForgottenPassword(c echo.Context) error {
 		data["otp"] = otp
 	}
 	c.Logger().Info("Storing session id for tracking")
-	key := fmt.Sprintf("forgotten-password-%s", sessionId.String())
+	key := sessionKey(sessionId.String())
 	if err := h.redis.SetEx(ctx, key, bValue, ExpireInMinute).Err(); err != nil {
 		c.Logger().Errorf("failed to store session id for tracking: %v", err)
 	}
@@ -259,7 +259,7 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 	}
 	// get otp from redis and compare user input
 	ctx := context.Background()
-	key := fmt.Sprintf("forgotten-password-%s", req.SessionId)
+	key := sessionKey(req.SessionId)
 	resp := h.redis.Get(ctx, key)
 	if resp.Err() != nil {
 		c.Logger().Errorf("Failed to find session id for current user: %v", resp)
@@ -275,13 +275,10 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 	var value map[string]string
 	if err := json.Unmarshal(jsonData, &value); err != nil {
 		c.Logger().Errorf("failed to unmarshal session data: %v", err)
-		return response.Error(c, errors.New("invalid OTP token"))
+		return response.Error(c, errors.New("something went wrong please try again"))
 	}
-	c.Logger().Infof("Validating session id for tracking user session: %v", resp.Val())
-	if value["session_id"] != req.SessionId {
-		c.Logger().Error("Invalid session id for tracking user session")
-		return response.Error(c, errors.New("invalid OTP token"))
-	}
+	fmt.Printf("Validating session id for tracking user session: %v", resp.Val())
+	fmt.Printf("redis cache value: %v, session from request: %v\n", value["session_id"], req.SessionId)
 	if value["otp"] != req.Otp {
 		c.Logger().Error("Invalid otp for tracking user session")
 		return response.Error(c, errors.New("invalid OTP token"))
@@ -293,7 +290,10 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 		c.Logger().Errorf("failed to marshal data: %v", err)
 		return response.Error(c, errors.New("something went wrong please try again"))
 	}
-	h.redis.Set(ctx, key, jBytes, ExpireInMinute)
+	if err := h.redis.Set(ctx, key, jBytes, ExpireInMinute).Err(); err != nil {
+		c.Logger().Errorf("failed to store session id for tracking: %v", err)
+		return response.Error(c, errors.New("something went wrong please try again"))
+	}
 	return response.Success(c, http.StatusOK, "user validation successful", value)
 }
 
@@ -306,8 +306,34 @@ func (h *AuthHandler) ResetPassword(c echo.Context) error {
 	if err := h.validator.Validate(&req); err != nil {
 		return response.ValidationError(c, err.Error())
 	}
+	ctx := context.Background()
+	key := sessionKey(req.SessionId)
+	resp := h.redis.Get(ctx, key)
+	if resp.Err() != nil {
+		c.Logger().Errorf("Failed to find session id for current user: %v", resp)
+		return response.Error(c, errors.New("invalid operation step"))
+	}
+	jsonData, err := resp.Bytes()
+	if err != nil {
+		c.Logger().Errorf("Failed to get json data: %v", err)
+		return response.Error(c, errors.New("something went wrong please try again"))
+	}
+	value := make(map[string]string)
+	if err := json.Unmarshal(jsonData, &value); err != nil {
+		c.Logger().Errorf("failed to unmarshal session data: %v", err)
+		return response.Error(c, errors.New("something went wrong please try again"))
+	}
+	if value["isValid"] != "true" {
+		c.Logger().Error("Invalid user operational step")
+		return response.Error(c, errors.New("unauthorized request access"))
+	}
+
 	if err := h.authService.ResetPassword(c.Request().Context(), &req); err != nil {
 		return response.Error(c, err)
 	}
 	return response.Success(c, http.StatusOK, "password has been reset successfully", nil)
+}
+
+func sessionKey(key string) string {
+	return fmt.Sprintf("forgotten-password-%s", key)
 }
