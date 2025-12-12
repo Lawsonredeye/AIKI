@@ -13,6 +13,7 @@ type Config struct {
 	Database DatabaseConfig
 	Redis    RedisConfig
 	JWT      JWTConfig
+	LinkedIn LinkedInConfig
 }
 
 type ServerConfig struct {
@@ -42,6 +43,12 @@ type JWTConfig struct {
 	RefreshExpiry time.Duration
 }
 
+type LinkedInConfig struct {
+	ClientID          string
+	ClientSecret      string
+	ClientCallbackUrl string
+}
+
 func Load() (*Config, error) {
 	// Load .env file if it exists (ignore error in production)
 	_ = godotenv.Load()
@@ -69,6 +76,11 @@ func Load() (*Config, error) {
 			Secret:        getEnv("JWT_SECRET", "your-super-secret-jwt-key-change-this-in-production"),
 			AccessExpiry:  parseDuration(getEnv("JWT_ACCESS_EXPIRY", "15m"), 15*time.Minute),
 			RefreshExpiry: parseDuration(getEnv("JWT_REFRESH_EXPIRY", "168h"), 7*24*time.Hour),
+		},
+		LinkedIn: LinkedInConfig{
+			ClientID:          getEnv("LINKEDIN_CLIENT_ID", ""),
+			ClientSecret:      getEnv("LINKEDIN_CLIENT_SECRET", ""),
+			ClientCallbackUrl: getEnv("LINKEDIN_CALLBACK_URL", "http://localhost:%s/auth/linkedin/callback"),
 		},
 	}
 

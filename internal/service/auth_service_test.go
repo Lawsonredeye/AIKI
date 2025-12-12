@@ -165,7 +165,7 @@ func TestAuthService_Login(t *testing.T) {
 			FirstName:    "John",
 			LastName:     "Doe",
 			Email:        req.Email,
-			PasswordHash: hashedPassword,
+			PasswordHash: &hashedPassword,
 			IsActive:     true,
 		}
 
@@ -209,7 +209,7 @@ func TestAuthService_Login(t *testing.T) {
 		existingUser := &domain.User{
 			ID:           1,
 			Email:        req.Email,
-			PasswordHash: hashedPassword,
+			PasswordHash: &hashedPassword,
 		}
 
 		mockRepo.On("GetByEmail", ctx, req.Email).Return(existingUser, nil).Once()
