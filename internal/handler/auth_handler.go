@@ -257,6 +257,7 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 	if err := h.validator.Validate(&req); err != nil {
 		return response.ValidationError(c, err.Error())
 	}
+
 	// get otp from redis and compare user input
 	ctx := context.Background()
 	key := sessionKey(req.SessionId)
@@ -265,6 +266,7 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 		c.Logger().Errorf("Failed to find session id for current user: %v", resp)
 		return response.Error(c, errors.New("invalid OTP token"))
 	}
+
 	c.Logger().Infof("Getting session id for tracking user session: %v", resp.Val())
 	jsonData, err := resp.Bytes()
 	if err != nil {
@@ -277,8 +279,8 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 		c.Logger().Errorf("failed to unmarshal session data: %v", err)
 		return response.Error(c, errors.New("something went wrong please try again"))
 	}
-	fmt.Printf("Validating session id for tracking user session: %v", resp.Val())
-	fmt.Printf("redis cache value: %v, session from request: %v\n", value["session_id"], req.SessionId)
+
+	fmt.Printf("Validating session id for tracking user session")
 	if value["otp"] != req.Otp {
 		c.Logger().Error("Invalid otp for tracking user session")
 		return response.Error(c, errors.New("invalid OTP token"))
@@ -290,6 +292,7 @@ func (h *AuthHandler) ValidateForgottenPasswordOTP(c echo.Context) error {
 		c.Logger().Errorf("failed to marshal data: %v", err)
 		return response.Error(c, errors.New("something went wrong please try again"))
 	}
+
 	if err := h.redis.Set(ctx, key, jBytes, ExpireInMinute).Err(); err != nil {
 		c.Logger().Errorf("failed to store session id for tracking: %v", err)
 		return response.Error(c, errors.New("something went wrong please try again"))
@@ -328,8 +331,11 @@ func (h *AuthHandler) ResetPassword(c echo.Context) error {
 		return response.Error(c, errors.New("unauthorized request access"))
 	}
 
-	if err := h.authService.ResetPassword(c.Request().Context(), &req); err != nil {
+	if err := h.authService.ResetPassword(c.Request().Context(), value["email"], req.NewPassword); err != nil {
 		return response.Error(c, err)
+	}
+	if err := h.redis.Del(ctx, key).Err(); err != nil {
+		c.Logger().Errorf("failed to delete session id for tracking user session: %v", err)
 	}
 	return response.Success(c, http.StatusOK, "password has been reset successfully", nil)
 }

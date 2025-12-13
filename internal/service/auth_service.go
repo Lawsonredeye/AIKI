@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"time"
 
 	"aiki/internal/domain"
@@ -18,7 +20,7 @@ type AuthService interface {
 	RefreshToken(ctx context.Context, refreshToken string) (*domain.AuthResponse, error)
 	Logout(ctx context.Context, refreshToken string) error
 	ForgottenPassword(ctx context.Context, req *domain.ForgotPasswordRequest) (string, error)
-	ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error
+	ResetPassword(ctx context.Context, userEmail, newPassword string) error
 }
 
 type authService struct {
@@ -186,8 +188,20 @@ func (s *authService) ForgottenPassword(ctx context.Context, req *domain.ForgotP
 	return user.Email, nil
 }
 
-func (s *authService) ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error {
-	//user, err := s.userRepo.GetByEmail(ctx)
-	//s.userRepo.UpdateUserPassword(ctx, user.ID, req.NewPassword)
+func (s *authService) ResetPassword(ctx context.Context, userEmail, newPassword string) error {
+	// get user by email and then update the user password
+	user, err := s.userRepo.GetByEmail(ctx, userEmail)
+	if err != nil {
+		return err
+	}
+	hashPassword, err := password.Hash(newPassword)
+	if err != nil {
+		fmt.Println("error hashing password")
+		return err
+	}
+	if err = s.userRepo.UpdateUserPassword(ctx, user.ID, hashPassword); err != nil {
+		fmt.Println("error updating user password: ", err)
+		return errors.New("error updating user password, please try again")
+	}
 	return nil
 }
