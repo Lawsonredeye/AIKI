@@ -1,8 +1,10 @@
 package repository
 
 import (
+	"aiki/internal/database/db"
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"aiki/internal/domain"
@@ -27,11 +29,12 @@ type UserRepository interface {
 }
 
 type userRepository struct {
-	db *pgxpool.Pool
+	db      *pgxpool.Pool
+	queries *db.Queries
 }
 
-func NewUserRepository(db *pgxpool.Pool) UserRepository {
-	return &userRepository{db: db}
+func NewUserRepository(dbPool *pgxpool.Pool) UserRepository {
+	return &userRepository{db: dbPool, queries: db.New(dbPool)}
 }
 
 func (r *userRepository) Create(ctx context.Context, user *domain.User, passwordHash string) (*domain.User, error) {
@@ -225,4 +228,62 @@ func (r *userRepository) UpdateUserPassword(ctx context.Context, userID int32, n
 
 	_, err := r.db.Exec(ctx, query, userID, newPasswordHash)
 	return err
+}
+
+func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+	profile, err := r.queries.CreateUserProfile(ctx, db.CreateUserProfileParams{
+		UserID:          userId,
+		FullName:        fullName,
+		CurrentJob:      currentJob,
+		ExperienceLevel: experienceLevel,
+	})
+	if err != nil {
+		fmt.Println("Error creating user profile:", err)
+		return nil, domain.ErrUserProfileNotCreated
+	}
+	fmt.Println("User profile created successfully")
+	return &domain.UserProfile{
+		UserId:          profile.UserID,
+		FullName:        *profile.FullName,
+		CurrentJob:      *profile.CurrentJob,
+		ExperienceLevel: *profile.ExperienceLevel,
+		UpdatedAt:       profile.UpdatedAt,
+	}, nil
+}
+
+func (r *userRepository) GetUserProfile(ctx context.Context, userId int32) (*domain.UserProfile, error) {
+	profile, err := r.queries.GetUserProfileByUserID(ctx, userId)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+	return &domain.UserProfile{
+		UserId:          profile.UserID,
+		FullName:        *profile.FullName,
+		CurrentJob:      *profile.CurrentJob,
+		ExperienceLevel: *profile.ExperienceLevel,
+		UpdatedAt:       profile.UpdatedAt,
+	}, nil
+}
+
+func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+	profile, err := r.queries.UpdateUserProfile(ctx, db.UpdateUserProfileParams{
+		UserID:          userId,
+		FullName:        fullName,
+		CurrentJob:      currentJob,
+		ExperienceLevel: experienceLevel,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.UserProfile{
+		UserId:          profile.UserID,
+		FullName:        *profile.FullName,
+		CurrentJob:      *profile.CurrentJob,
+		ExperienceLevel: *profile.ExperienceLevel,
+		UpdatedAt:       profile.UpdatedAt,
+	}, nil
 }
