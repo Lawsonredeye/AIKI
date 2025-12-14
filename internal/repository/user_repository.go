@@ -26,6 +26,9 @@ type UserRepository interface {
 	DeleteRefreshToken(ctx context.Context, token string) error
 	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
 	UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error
+	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
+	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
+	GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error)
 }
 
 type userRepository struct {
@@ -251,9 +254,10 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 	}, nil
 }
 
-func (r *userRepository) GetUserProfile(ctx context.Context, userId int32) (*domain.UserProfile, error) {
+func (r *userRepository) GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error) {
 	profile, err := r.queries.GetUserProfileByUserID(ctx, userId)
 	if err != nil {
+		fmt.Println("Error getting user profile:", err)
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil, domain.ErrUserNotFound
 		}
