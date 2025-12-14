@@ -2,4 +2,4 @@
 ALTER TABLE "users" ADD COLUMN "linkedin_id" TEXT;
 
 -- Make the password column nullable to allow for social-only signups.
-ALTER TABLE "users" ALTER COLUMN "password" DROP NOT NULL;
+ALTER TABLE "users" ALTER COLUMN "password_hash" DROP NOT NULL;
