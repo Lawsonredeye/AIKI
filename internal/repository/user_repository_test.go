@@ -21,7 +21,7 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 		t.Skip("Skipping integration test")
 	}
 
-	connString := "host=localhost port=5432 user=aiki password=aiki_password dbname=aiki_db sslmode=disable"
+	connString := "host=localhost port=5433 user=aiki_test password=aiki_test_password dbname=aiki_test_db sslmode=disable"
 
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, connString)
@@ -30,7 +30,9 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 	// Clean up test data
 	t.Cleanup(func() {
 		pool.Exec(context.Background(), "DELETE FROM refresh_tokens")
+		pool.Exec(ctx, "DELETE FROM user_profile")
 		pool.Exec(context.Background(), "DELETE FROM users WHERE email LIKE '%@test.com'")
+		pool.Exec(context.Background(), "DELETE FROM users")
 		pool.Close()
 	})
 
@@ -194,6 +196,65 @@ func TestUserRepository_RefreshTokens(t *testing.T) {
 	// Verify it's deleted
 	_, err = repo.GetRefreshToken(ctx, token)
 	assert.ErrorIs(t, err, domain.ErrInvalidToken)
+}
+
+func TestUserRepository_CreateUserProfile(t *testing.T) {
+	pool := setupTestDB(t)
+	repo := NewUserRepository(pool)
+	ctx := context.Background()
+
+	user := &domain.User{
+		FirstName:   "John",
+		LastName:    "Doe",
+		Email:       "john.doe@test.com",
+		PhoneNumber: stringPtr("+1234567890"),
+	}
+
+	createdUser, err := repo.Create(ctx, user, "hashed_password")
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+
+	profile := &domain.UserProfile{
+		UserId:          createdUser.ID,
+		ExperienceLevel: "beginner",
+		CurrentJob:      "backend developer",
+		FullName:        "John Smith",
+	}
+	fullName := stringPtr(profile.FullName)
+	xpLevel := stringPtr(profile.ExperienceLevel)
+	currentJob := stringPtr(profile.CurrentJob)
+	createdProfile, err := repo.CreateUserProfile(ctx, createdUser.ID, fullName, currentJob, xpLevel)
+	assert.NoError(t, err)
+	assert.NotNil(t, createdProfile)
+	assert.Equal(t, createdUser.ID, createdProfile.UserId)
+}
+
+func TestUserRepository_GetUserProfile(t *testing.T) {
+	pool := setupTestDB(t)
+	repo := NewUserRepository(pool)
+	ctx := context.Background()
+	user := &domain.User{
+		FirstName:   "John",
+		LastName:    "Doe",
+		Email:       "test@test.com",
+		PhoneNumber: stringPtr("+1234567890"),
+	}
+
+	createdUser, err := repo.Create(ctx, user, "hashed_password")
+	assert.NoError(t, err)
+	assert.NotNil(t, createdUser)
+	pf := &domain.UserProfile{
+		UserId:          createdUser.ID,
+		FullName:        "John Smith",
+		CurrentJob:      "backend developer",
+		ExperienceLevel: "beginner",
+	}
+	createUserProfile, err := repo.CreateUserProfile(ctx, pf.UserId, &pf.FullName, &pf.CurrentJob, &pf.ExperienceLevel)
+	assert.NoError(t, err)
+	assert.Equal(t, createdUser.ID, createUserProfile.UserId)
+	profile, err := repo.GetUserProfileByID(ctx, createdUser.ID)
+	assert.NoError(t, err)
+	assert.NotNil(t, profile)
 }
 
 func stringPtr(s string) *string {
