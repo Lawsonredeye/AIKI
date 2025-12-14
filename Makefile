@@ -19,6 +19,9 @@ sqlc-generate: ## Generate SQLC code
 migrate-create: ## Create a new migration (usage: make migrate-create name=create_users_table)
 	@migrate create -ext sql -dir migrations -seq $(name)
 
+migrate-test-up: ## Test database migrations up
+	@migrate -path migrations -database "postgresql://aiki_test:aiki_test_password@localhost:5433/aiki_test_db?sslmode=disable" -verbose up
+
 migrate-up: ## Run database migrations up
 	@migrate -path migrations -database "postgresql://aiki:aiki_password@localhost:5432/aiki_db?sslmode=disable" -verbose up
 
