@@ -16,6 +16,23 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-test:
+    image: postgres:16-alpine
+    container_name: aiki-postgres-test
+    environment:
+      POSTGRES_USER: aiki_test
+      POSTGRES_PASSWORD: aiki_test_password
+      POSTGRES_DB: aiki_test_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data_test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aiki_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     container_name: aiki-redis
@@ -31,4 +48,5 @@ services:
 
 volumes:
   postgres_data:
+  postgres_data_test:
   redis_data:
