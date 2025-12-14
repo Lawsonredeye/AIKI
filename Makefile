@@ -22,6 +22,9 @@ migrate-create: ## Create a new migration (usage: make migrate-create name=creat
 migrate-up: ## Run database migrations up
 	@migrate -path migrations -database "postgresql://aiki:aiki_password@localhost:5432/aiki_db?sslmode=disable" -verbose up
 
+migrate-cleanup: ## Clean up failed migrations
+	@migrate -path migrations -database "postgresql://aiki:aiki_password@localhost:5432/aiki_db?sslmode=disable" force 1
+
 migrate-down: ## Run database migrations down
 	@migrate -path migrations -database "postgresql://aiki:aiki_password@localhost:5432/aiki_db?sslmode=disable" -verbose down
 
