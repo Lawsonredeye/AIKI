@@ -57,3 +57,11 @@ func (s *userService) Update(ctx context.Context, id int32, req *domain.UpdateUs
 	user.PasswordHash = nil
 	return user, nil
 }
+
+func (s *userService) CreateUserProfile(ctx context.Context, userProfile domain.UserProfile) (*domain.UserProfile, error) {
+	profile, err := s.userRepo.CreateUserProfile(ctx, userProfile.UserId, &userProfile.FullName, &userProfile.CurrentJob, &userProfile.ExperienceLevel)
+	if err != nil {
+		return nil, err
+	}
+	return profile, nil
+}
