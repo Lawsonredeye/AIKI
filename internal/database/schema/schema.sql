@@ -52,6 +52,7 @@ CREATE INDEX idx_refresh_tokens_expires_at ON refresh_tokens(expires_at);
 CREATE TABLE IF NOT EXISTS user_profile (
     id SERIAL PRIMARY KEY,
     user_id INT NOT NULL UNIQUE REFERENCES users(id),
+    cv BYTEA,
     full_name VARCHAR(200),
     current_job VARCHAR(255),
     experience_level VARCHAR(100),

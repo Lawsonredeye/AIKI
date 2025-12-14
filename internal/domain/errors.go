@@ -19,6 +19,8 @@ var (
 	ErrWeakPassword             = errors.New("password is too weak")
 	ErrUserProfileNotCreated    = errors.New("user profile not created")
 	ErrUserProfileAlreadyExists = errors.New("user profile already exists")
+	ErrFileSizeExceedsLimit     = errors.New("file size exceeds limit")
+	ErrFailedToUpload           = errors.New("failed to upload file")
 )
 
 // AppError represents an application error with HTTP status code

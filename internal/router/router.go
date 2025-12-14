@@ -48,5 +48,6 @@ func Setup(
 		users.PUT("/me", userHandler.UpdateMe)
 		users.POST("/profile", userHandler.CreateProfile)
 		users.PATCH("/profile", userHandler.UpdateProfile)
+		users.POST("/upload/cv", userHandler.UploadCV)
 	}
 }

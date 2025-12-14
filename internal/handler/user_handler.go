@@ -132,3 +132,38 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	}
 	return response.Success(c, http.StatusOK, "user profile successfully", profile)
 }
+
+func (h *UserHandler) UploadCV(c echo.Context) error {
+	id, ok := c.Get("user_id").(int32)
+	if !ok {
+		return response.Error(c, domain.ErrUnauthorized)
+	}
+
+	fileHeader, err := c.FormFile("cv")
+	if err != nil {
+		c.Logger().Errorf("failed to get file from form: %v", err)
+		return response.Error(c, domain.ErrInvalidInput)
+	}
+
+	file, err := fileHeader.Open()
+	if err != nil {
+		c.Logger().Errorf("failed to open file: %v", err)
+		return response.Error(c, domain.ErrInvalidInput)
+	}
+	defer file.Close()
+
+	data := make([]byte, fileHeader.Size)
+	_, err = file.Read(data)
+	if err != nil {
+		c.Logger().Errorf("failed to read file: %v", err)
+		return response.Error(c, domain.ErrInvalidInput)
+	}
+
+	err = h.userService.UploadUserCV(c.Request().Context(), id, data)
+	if err != nil {
+		c.Logger().Errorf("failed to upload CV: %v", err)
+		return response.Error(c, err)
+	}
+
+	return response.Success(c, http.StatusOK, "file uploaded successfully", nil)
+}

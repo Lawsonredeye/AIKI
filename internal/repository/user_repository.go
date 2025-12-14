@@ -30,6 +30,7 @@ type UserRepository interface {
 	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
 	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
 	GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error)
+	UploadCV(ctx context.Context, userId int32, data []byte) error
 }
 
 type userRepository struct {
@@ -301,3 +302,24 @@ func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fu
 		UpdatedAt:       profile.UpdatedAt,
 	}, nil
 }
+
+func (r *userRepository) UploadCV(ctx context.Context, userId int32, data []byte) error {
+	const maxSize = 5 * 1024 * 1024
+	if len(data) > maxSize {
+		return domain.ErrFileSizeExceedsLimit
+	}
+	_, err := r.queries.UploadUserCV(ctx, db.UploadUserCVParams{
+		UserID: userId,
+		Cv:     data,
+	})
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return domain.ErrFailedToUpload
+		}
+		fmt.Println("Error uploading CV:", err)
+		return domain.ErrInternalServer
+	}
+	return nil
+}
+
+//func (r *userRepository) GetCV(ctx context.Context, userId int32) (byt)

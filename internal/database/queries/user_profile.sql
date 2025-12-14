@@ -22,3 +22,12 @@ SET
     updated_at = NOW()
 WHERE user_id = $1
 RETURNING *;
+
+
+-- name: UploadUserCV :one
+UPDATE user_profile
+SET
+    cv = $2,
+    updated_at = NOW()
+WHERE user_id = $1
+RETURNING *;
