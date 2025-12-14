@@ -29,6 +29,12 @@ type UserProfile struct {
 	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
 }
 
+type UserProfileRequest struct {
+	FullName        string `json:"full_name" validate:"required,min=7,max=200"`
+	CurrentJob      string `json:"current_job" validate:"required,min=5,max=200"`
+	ExperienceLevel string `json:"experience_level" validate:"required,min=5,max=200"`
+}
+
 // RegisterRequest represents the request to register a new user
 type RegisterRequest struct {
 	FirstName   string  `json:"first_name" validate:"required,min=2,max=100"`

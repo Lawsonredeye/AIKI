@@ -1,11 +1,10 @@
 package handler
 
 import (
-	"net/http"
-
 	"aiki/internal/domain"
 	"aiki/internal/pkg/response"
 	"aiki/internal/service"
+	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
@@ -83,4 +82,53 @@ func (h *UserHandler) UpdateMe(c echo.Context) error {
 	}
 
 	return response.Success(c, http.StatusOK, "user updated successfully", user)
+}
+
+func (h *UserHandler) CreateProfile(c echo.Context) error {
+	id, ok := c.Get("user_id").(int32)
+	if !ok {
+		return response.Error(c, domain.ErrUnauthorized)
+	}
+	var req domain.UserProfileRequest
+	if err := c.Bind(&req); err != nil {
+		return response.ValidationError(c, "invalid request body")
+	}
+	if err := h.validator.Validate(&req); err != nil {
+		return response.ValidationError(c, err.Error())
+	}
+	pf := domain.UserProfile{
+		UserId:          id,
+		FullName:        req.FullName,
+		CurrentJob:      req.CurrentJob,
+		ExperienceLevel: req.ExperienceLevel,
+	}
+
+	user, err := h.userService.CreateUserProfile(c.Request().Context(), pf)
+	if err != nil {
+		return response.Error(c, err)
+	}
+	return response.Success(c, http.StatusOK, "user profile successfully", user)
+}
+
+func (h *UserHandler) UpdateProfile(c echo.Context) error {
+	id, ok := c.Get("user_id").(int32)
+	if !ok {
+		return response.Error(c, domain.ErrUnauthorized)
+	}
+	var req domain.UserProfile
+	if err := c.Bind(&req); err != nil {
+		c.Logger().Errorf("error body data: %v", err)
+		return response.ValidationError(c, "invalid request body")
+	}
+	if err := h.validator.Validate(&req); err != nil {
+		c.Logger().Errorf("failed to validate user input: %v", err)
+		return response.ValidationError(c, err.Error())
+	}
+	req.UserId = id
+	profile, err := h.userService.UpdateUserProfile(c.Request().Context(), req)
+	if err != nil {
+		c.Logger().Errorf("failed to update user profile: %v", err)
+		return response.Error(c, err)
+	}
+	return response.Success(c, http.StatusOK, "user profile successfully", profile)
 }

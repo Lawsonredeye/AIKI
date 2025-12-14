@@ -7,17 +7,18 @@ import (
 
 // Domain errors
 var (
-	ErrUserNotFound          = errors.New("user not found")
-	ErrUserAlreadyExists     = errors.New("user already exists")
-	ErrInvalidCredentials    = errors.New("invalid credentials")
-	ErrInvalidToken          = errors.New("invalid token")
-	ErrTokenExpired          = errors.New("token expired")
-	ErrUnauthorized          = errors.New("unauthorized")
-	ErrInvalidInput          = errors.New("invalid input")
-	ErrInternalServer        = errors.New("internal server error")
-	ErrEmailAlreadyExists    = errors.New("email already exists")
-	ErrWeakPassword          = errors.New("password is too weak")
-	ErrUserProfileNotCreated = errors.New("user profile not created")
+	ErrUserNotFound             = errors.New("user not found")
+	ErrUserAlreadyExists        = errors.New("user already exists")
+	ErrInvalidCredentials       = errors.New("invalid credentials")
+	ErrInvalidToken             = errors.New("invalid token")
+	ErrTokenExpired             = errors.New("token expired")
+	ErrUnauthorized             = errors.New("unauthorized")
+	ErrInvalidInput             = errors.New("invalid input")
+	ErrInternalServer           = errors.New("internal server error")
+	ErrEmailAlreadyExists       = errors.New("email already exists")
+	ErrWeakPassword             = errors.New("password is too weak")
+	ErrUserProfileNotCreated    = errors.New("user profile not created")
+	ErrUserProfileAlreadyExists = errors.New("user profile already exists")
 )
 
 // AppError represents an application error with HTTP status code

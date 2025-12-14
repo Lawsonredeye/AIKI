@@ -46,5 +46,7 @@ func Setup(
 	{
 		users.GET("/me", userHandler.GetMe)
 		users.PUT("/me", userHandler.UpdateMe)
+		users.POST("/profile", userHandler.CreateProfile)
+		users.PATCH("/profile", userHandler.UpdateProfile)
 	}
 }

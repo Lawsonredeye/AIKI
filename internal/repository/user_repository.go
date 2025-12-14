@@ -10,6 +10,7 @@ import (
 	"aiki/internal/domain"
 
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -241,6 +242,15 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 		ExperienceLevel: experienceLevel,
 	})
 	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			switch pgErr.Code {
+			case "23505": // unique_violation
+				return nil, domain.ErrUserProfileAlreadyExists
+			case "23503": // foreign_key_violation
+				return nil, domain.ErrUserProfileAlreadyExists
+			}
+		}
 		fmt.Println("Error creating user profile:", err)
 		return nil, domain.ErrUserProfileNotCreated
 	}

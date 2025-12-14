@@ -20,6 +20,26 @@ type MockUserRepository struct {
 	mock.Mock
 }
 
+func (m *MockUserRepository) UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockUserRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockUserRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
+func (m *MockUserRepository) GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error) {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (m *MockUserRepository) Create(ctx context.Context, user *domain.User, passwordHash string) (*domain.User, error) {
 	args := m.Called(ctx, user, passwordHash)
 	if args.Get(0) == nil {
