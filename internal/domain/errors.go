@@ -21,6 +21,10 @@ var (
 	ErrUserProfileAlreadyExists = errors.New("user profile already exists")
 	ErrFileSizeExceedsLimit     = errors.New("file size exceeds limit")
 	ErrFailedToUpload           = errors.New("failed to upload file")
+	ErrInvalidDateFormat        = errors.New("invalid date format")
+	ErrFailedToCreateJob        = errors.New("failed to create job")
+	ErrFailedToUpdateJob        = errors.New("failed to update job")
+	ErrInvalidJobID             = errors.New("invalid job id")
 )
 
 // AppError represents an application error with HTTP status code
