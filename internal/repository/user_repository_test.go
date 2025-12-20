@@ -33,6 +33,7 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 		pool.Exec(ctx, "DELETE FROM user_profile")
 		pool.Exec(context.Background(), "DELETE FROM users WHERE email LIKE '%@test.com'")
 		pool.Exec(context.Background(), "DELETE FROM users")
+		pool.Exec(ctx, "DELETE FROM jobs")
 		pool.Close()
 	})
 

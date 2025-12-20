@@ -45,6 +45,35 @@ func (m *MockUserService) Update(ctx context.Context, id int32, req *domain.Upda
 	return args.Get(0).(*domain.User), args.Error(1)
 }
 
+func (m *MockUserService) CreateUserProfile(ctx context.Context, req domain.UserProfile) (*domain.UserProfile, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.UserProfile), args.Error(1)
+}
+
+func (m *MockUserService) GetUserProfile(ctx context.Context, id int32) (*domain.UserProfile, error) {
+	args := m.Called(ctx, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.UserProfile), args.Error(1)
+}
+
+func (m *MockUserService) UpdateUserProfile(ctx context.Context, req domain.UserProfile) (*domain.UserProfile, error) {
+	args := m.Called(ctx, req)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.UserProfile), args.Error(1)
+}
+
+func (m *MockUserService) UploadUserCV(ctx context.Context, userID int32, data []byte) error {
+	args := m.Called(ctx, userID, data)
+	return args.Error(0)
+}
+
 func TestUserHandler_GetMe(t *testing.T) {
 	e := setupEcho()
 	mockService := new(MockUserService)
