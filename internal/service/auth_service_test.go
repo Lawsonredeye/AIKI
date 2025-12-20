@@ -96,6 +96,10 @@ func (m *MockUserRepository) DeleteUserRefreshTokens(ctx context.Context, userID
 	args := m.Called(ctx, userID)
 	return args.Error(0)
 }
+func (m *MockUserRepository) UploadCV(ctx context.Context, userID int32, data []byte) error {
+	//TODO implement me
+	panic("implement me")
+}
 
 func TestAuthService_Register(t *testing.T) {
 	mockRepo := new(MockUserRepository)

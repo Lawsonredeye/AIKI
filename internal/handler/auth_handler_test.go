@@ -24,7 +24,7 @@ type MockAuthService struct {
 	mock.Mock
 }
 
-func (m *MockAuthService) ResetPassword(ctx context.Context, req *domain.ResetPasswordRequest) error {
+func (m *MockAuthService) ResetPassword(ctx context.Context, email, newPassword string) error {
 	//TODO implement me
 	return nil
 }
