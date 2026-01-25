@@ -19,6 +19,7 @@ type JobRepository interface {
 	Update(ctx context.Context, jobId int32, job *domain.Job) error
 	DeleteJob(ctx context.Context, jobId int32) error
 	GetJobByID(ctx context.Context, jobId int32) (*domain.Job, error)
+	GetAllJobs(ctx context.Context, userId int32) ([]db.Job, error)
 }
 
 type jobRepository struct {
@@ -104,6 +105,10 @@ func (jr *jobRepository) GetJobByID(ctx context.Context, jobId int32) (*domain.J
 		Link:        *job.Link,
 		CreatedAt:   job.CreatedAt,
 	}, nil
+}
+
+func (jr *jobRepository) GetAllJobs(ctx context.Context, userId int32) ([]db.Job, error) {
+	return jr.db.GetJobs(ctx, userId)
 }
 
 func PgTimeHelper(data time.Time) pgtype.Timestamp {
