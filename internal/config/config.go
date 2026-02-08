@@ -22,6 +22,7 @@ type ServerConfig struct {
 }
 
 type DatabaseConfig struct {
+	URL      string
 	Host     string
 	Port     string
 	User     string
@@ -35,6 +36,7 @@ type RedisConfig struct {
 	Port     string
 	Password string
 	DB       int
+	Addr     string
 }
 
 type JWTConfig struct {
@@ -59,7 +61,8 @@ func Load() (*Config, error) {
 			Env:  getEnv("ENV", "development"),
 		},
 		Database: DatabaseConfig{
-			Host:     getEnv("DB_HOST", "host.docker.internal"),
+			URL:      getEnv("DB_URL", ""),
+			Host:     getEnv("DB_HOST", "localhost"),
 			Port:     getEnv("DB_PORT", "5432"),
 			User:     getEnv("DB_USER", "aiki"),
 			Password: getEnv("DB_PASSWORD", "aiki_password"),
@@ -67,7 +70,8 @@ func Load() (*Config, error) {
 			SSLMode:  getEnv("DB_SSL_MODE", "disable"),
 		},
 		Redis: RedisConfig{
-			Host:     getEnv("REDIS_HOST", "host.docker.internal"),
+			Addr:     getEnv("REDIS_ADDR", ""),
+			Host:     getEnv("REDIS_HOST", "localhost"),
 			Port:     getEnv("REDIS_PORT", "6379"),
 			Password: getEnv("REDIS_PASSWORD", ""),
 			DB:       0,
@@ -88,11 +92,16 @@ func Load() (*Config, error) {
 }
 
 func (c *DatabaseConfig) ConnectionString() string {
+	return c.URL
+
+}
+
+/*func (c *DatabaseConfig) ConnectionString() string {
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		c.Host, c.Port, c.User, c.Password, c.DBName, c.SSLMode,
 	)
-}
+}*/
 
 func (c *RedisConfig) Address() string {
 	return fmt.Sprintf("%s:%s", c.Host, c.Port)

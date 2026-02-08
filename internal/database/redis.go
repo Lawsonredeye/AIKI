@@ -12,7 +12,7 @@ import (
 
 func NewRedisClient(cfg *config.RedisConfig) (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
-		Addr:         cfg.Address(),
+		Addr:         cfg.Addr,
 		Password:     cfg.Password,
 		DB:           cfg.DB,
 		DialTimeout:  5 * time.Second,
