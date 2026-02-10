@@ -54,10 +54,12 @@ func main() {
 
 	// Initialize repositories
 	userRepo := repository.NewUserRepository(db)
+	jobRepo := repository.NewJobRepository(db)
 
 	// Initialize services
 	authService := service.NewAuthService(userRepo, jwtManager)
 	userService := service.NewUserService(userRepo)
+	jobService := service.NewJobService(jobRepo)
 
 	// Initialize Echo
 	e := echo.New()
@@ -72,9 +74,10 @@ func main() {
 	// Initialize handlers
 	authHandler := handler.NewAuthHandler(authService, e.Validator, redis)
 	userHandler := handler.NewUserHandler(userService, e.Validator)
+	jobHandler := handler.NewJobHandler(jobService, e.Validator)
 
 	// Setup routes
-	router.Setup(e, authHandler, userHandler, jwtManager)
+	router.Setup(e, authHandler, userHandler, jobHandler, jwtManager)
 
 	// Start server
 	serverAddr := fmt.Sprintf(":%s", cfg.Server.Port)

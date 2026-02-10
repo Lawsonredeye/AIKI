@@ -13,6 +13,7 @@ func Setup(
 	e *echo.Echo,
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
+	jobHandler *handler.JobHandler,
 	jwtManager *jwt.Manager,
 ) {
 	// API v1 group
@@ -49,5 +50,16 @@ func Setup(
 		users.POST("/profile", userHandler.CreateProfile)
 		users.PATCH("/profile", userHandler.UpdateProfile)
 		users.POST("/upload/cv", userHandler.UploadCV)
+	}
+
+	// Job routes (auth required)
+	jobs := api.Group("/jobs")
+	jobs.Use(middleware.Auth(jwtManager))
+	{
+		jobs.POST("", jobHandler.CreateJob)
+		jobs.GET("", jobHandler.GetAllJobs)
+		jobs.GET("/:id", jobHandler.GetJob)
+		jobs.PUT("/:id", jobHandler.UpdateJob)
+		jobs.DELETE("/:id", jobHandler.DeleteJob)
 	}
 }
