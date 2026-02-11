@@ -1,4 +1,4 @@
-# Quick Start Guide - Aiki Backend
+# Quick Start Guide - Aiki Backend.
 
 ## Prerequisites
 - Docker & Docker Compose installed
