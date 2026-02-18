@@ -1,0 +1,1191 @@
+basePath: /api/v1
+definitions:
+  domain.AuthResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+      user:
+        $ref: '#/definitions/domain.User'
+    type: object
+  domain.BadgeDefinition:
+    properties:
+      created_at:
+        type: string
+      criteria_type:
+        type: string
+      criteria_value:
+        type: integer
+      description:
+        type: string
+      icon_key:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  domain.FocusSession:
+    properties:
+      created_at:
+        type: string
+      duration_seconds:
+        description: planned
+        type: integer
+      elapsed_seconds:
+        description: completed so far
+        type: integer
+      ended_at:
+        type: string
+      id:
+        type: integer
+      started_at:
+        type: string
+      status:
+        $ref: '#/definitions/domain.SessionStatus'
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.HomeScreenData:
+    properties:
+      active_session:
+        $ref: '#/definitions/domain.FocusSession'
+      recent_badges:
+        items:
+          $ref: '#/definitions/domain.UserBadge'
+        type: array
+      streak:
+        $ref: '#/definitions/domain.Streak'
+      total_badges:
+        type: integer
+      weekly_progress:
+        $ref: '#/definitions/domain.ProgressSummary'
+    type: object
+  domain.Job:
+    properties:
+      company_name:
+        type: string
+      created_at:
+        type: string
+      date_applied:
+        type: string
+      id:
+        type: integer
+      link:
+        type: string
+      location:
+        type: string
+      notes:
+        type: string
+      platform:
+        description: could be linkedin, website or indeed or others
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.JobRequest:
+    properties:
+      company_name:
+        type: string
+      date_applied:
+        description: DD-MM-YYYY
+        type: string
+      link:
+        type: string
+      location:
+        type: string
+      notes:
+        type: string
+      platform:
+        description: could be linkedin, website or indeed or others
+        type: string
+      status:
+        type: string
+      title:
+        type: string
+    type: object
+  domain.LoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.ProgressSummary:
+    properties:
+      days_active:
+        type: integer
+      period:
+        description: weekly | monthly | yearly
+        type: string
+      sessions_completed:
+        type: integer
+      total_focus_hours:
+        type: number
+      total_focus_seconds:
+        type: integer
+    type: object
+  domain.RefreshTokenRequest:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  domain.RegisterRequest:
+    properties:
+      email:
+        type: string
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        maxLength: 100
+        minLength: 8
+        type: string
+      phone_number:
+        maxLength: 20
+        minLength: 10
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    type: object
+  domain.SessionStatus:
+    enum:
+    - active
+    - paused
+    - completed
+    - abandoned
+    type: string
+    x-enum-varnames:
+    - SessionStatusActive
+    - SessionStatusPaused
+    - SessionStatusCompleted
+    - SessionStatusAbandoned
+  domain.StartSessionRequest:
+    properties:
+      duration_seconds:
+        maximum: 86400
+        minimum: 60
+        type: integer
+    required:
+    - duration_seconds
+    type: object
+  domain.Streak:
+    properties:
+      current_streak:
+        type: integer
+      last_session_date:
+        type: string
+      longest_streak:
+        type: integer
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.UpdateSessionRequest:
+    properties:
+      elapsed_seconds:
+        minimum: 0
+        type: integer
+      status:
+        allOf:
+        - $ref: '#/definitions/domain.SessionStatus'
+        enum:
+        - active
+        - paused
+        - completed
+        - abandoned
+    required:
+    - elapsed_seconds
+    - status
+    type: object
+  domain.UpdateUserRequest:
+    properties:
+      first_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      last_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      phone_number:
+        maxLength: 20
+        minLength: 10
+        type: string
+    type: object
+  domain.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      last_name:
+        type: string
+      linkedin_id:
+        description: Nullable LinkedIn ID
+        type: string
+      phone_number:
+        type: string
+      updated_at:
+        type: string
+    type: object
+  domain.UserBadge:
+    properties:
+      badge_id:
+        type: integer
+      description:
+        type: string
+      earned_at:
+        type: string
+      icon_key:
+        type: string
+      name:
+        type: string
+    type: object
+  domain.UserProfile:
+    properties:
+      current_job:
+        type: string
+      experience_level:
+        type: string
+      full_name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.UserProfileRequest:
+    properties:
+      current_job:
+        maxLength: 200
+        minLength: 5
+        type: string
+      experience_level:
+        maxLength: 200
+        minLength: 5
+        type: string
+      full_name:
+        maxLength: 200
+        minLength: 7
+        type: string
+    required:
+    - current_job
+    - experience_level
+    - full_name
+    type: object
+  response.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: support@aiki.app
+    name: Aiki Support
+  description: Backend API for Aiki — focus sessions, job tracking, streaks and badges.
+  title: Aiki API
+  version: "1.0"
+paths:
+  /auth/linkedin/login:
+    get:
+      description: Redirects user to LinkedIn for authentication
+      produces:
+      - text/html
+      responses:
+        "302":
+          description: Redirects to LinkedIn
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Initiate LinkedIn login
+      tags:
+      - auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate user and return tokens
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Login
+      tags:
+      - auth
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Invalidate refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Logout
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Get a new access token using refresh token
+      parameters:
+      - description: Refresh token
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RefreshTokenRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Refresh access token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user account
+      parameters:
+      - description: Registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Register a new user
+      tags:
+      - auth
+  /badges:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.BadgeDefinition'
+                  type: array
+              type: object
+      security:
+      - BearerAuth: []
+      summary: Get all badge definitions
+      tags:
+      - badges
+  /badges/me:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.UserBadge'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user's earned badges
+      tags:
+      - badges
+  /home:
+    get:
+      description: 'Returns aggregated home screen data: streak, active session, weekly
+        progress, recent badges'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.HomeScreenData'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get home screen data
+      tags:
+      - home
+  /jobs:
+    get:
+      consumes:
+      - application/json
+      description: Get all job applications for the authenticated user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.Job'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get all jobs
+      tags:
+      - jobs
+    post:
+      consumes:
+      - application/json
+      description: Create a new job application for the authenticated user
+      parameters:
+      - description: Job details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.JobRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  additionalProperties:
+                    format: int32
+                    type: integer
+                  type: object
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create a new job
+      tags:
+      - jobs
+  /jobs/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a job application
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Delete a job
+      tags:
+      - jobs
+    get:
+      consumes:
+      - application/json
+      description: Get a specific job application by ID
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Job'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get a job by ID
+      tags:
+      - jobs
+    put:
+      consumes:
+      - application/json
+      description: Update an existing job application
+      parameters:
+      - description: Job ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated job details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.JobRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Job'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update a job
+      tags:
+      - jobs
+  /progress:
+    get:
+      description: Returns focus time stats for the given period (weekly | monthly
+        | yearly)
+      parameters:
+      - description: 'Period: weekly (default), monthly, yearly'
+        in: query
+        name: period
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.ProgressSummary'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get progress summary
+      tags:
+      - progress
+  /sessions:
+    get:
+      parameters:
+      - description: Limit (default 20)
+        in: query
+        name: limit
+        type: integer
+      - description: Offset (default 0)
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.FocusSession'
+                  type: array
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get session history
+      tags:
+      - sessions
+    post:
+      consumes:
+      - application/json
+      description: Starts a new lock-in focus session for the authenticated user
+      parameters:
+      - description: Session details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.StartSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FocusSession'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Session already active
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Start a focus session
+      tags:
+      - sessions
+  /sessions/{id}/end:
+    patch:
+      consumes:
+      - application/json
+      description: Ends a session as completed or abandoned
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Elapsed seconds and status
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FocusSession'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: End a focus session
+      tags:
+      - sessions
+  /sessions/{id}/pause:
+    patch:
+      consumes:
+      - application/json
+      description: Pauses an active focus session
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Elapsed seconds
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateSessionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FocusSession'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Pause a focus session
+      tags:
+      - sessions
+  /sessions/{id}/resume:
+    patch:
+      parameters:
+      - description: Session ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FocusSession'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Resume a paused session
+      tags:
+      - sessions
+  /sessions/active:
+    get:
+      description: Returns the current active or paused session, if any
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.FocusSession'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get active session
+      tags:
+      - sessions
+  /streaks:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.Streak'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get user streak
+      tags:
+      - streaks
+  /users/me:
+    get:
+      consumes:
+      - application/json
+      description: Get the currently authenticated user's profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Get current user
+      tags:
+      - users
+    put:
+      consumes:
+      - application/json
+      description: Update the currently authenticated user's profile
+      parameters:
+      - description: Update user details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.User'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update current user
+      tags:
+      - users
+  /users/profile:
+    patch:
+      consumes:
+      - application/json
+      description: Update the currently authenticated user's profile details
+      parameters:
+      - description: Updated profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserProfile'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a profile for the currently authenticated user
+      parameters:
+      - description: Profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserProfile'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create user profile
+      tags:
+      - users
+  /users/upload/cv:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a CV file (PDF, max 5MB) for the currently authenticated
+        user
+      parameters:
+      - description: CV file
+        in: formData
+        name: cv
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload CV
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    description: 'Type "Bearer" followed by your access token. Example: "Bearer eyJhbGc..."'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

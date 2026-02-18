@@ -261,7 +261,7 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 		FullName:        *profile.FullName,
 		CurrentJob:      *profile.CurrentJob,
 		ExperienceLevel: *profile.ExperienceLevel,
-		UpdatedAt:       profile.UpdatedAt,
+		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
 
@@ -279,7 +279,7 @@ func (r *userRepository) GetUserProfileByID(ctx context.Context, userId int32) (
 		FullName:        *profile.FullName,
 		CurrentJob:      *profile.CurrentJob,
 		ExperienceLevel: *profile.ExperienceLevel,
-		UpdatedAt:       profile.UpdatedAt,
+		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
 
@@ -299,7 +299,7 @@ func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fu
 		FullName:        *profile.FullName,
 		CurrentJob:      *profile.CurrentJob,
 		ExperienceLevel: *profile.ExperienceLevel,
-		UpdatedAt:       profile.UpdatedAt,
+		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
 

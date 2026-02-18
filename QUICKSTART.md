@@ -1,13 +1,13 @@
-# Quick Start Guide - Aiki Backend
+# Quick Start Guide - Aiki Backend.
 
-## Prerequisites
+## Prerequisites.
 - Docker & Docker Compose installed
 - Go 1.24+ installed
 - Make (optional)
 
 ## Setup (5 minutes)
 
-### 1. Start Database Services
+### 1. Start Database Services.
 ```bash
 docker-compose up -d # if you use v1
 docker compose up -d # if you use v2
@@ -117,6 +117,55 @@ curl -X PUT http://localhost:8080/api/v1/users/me \
     "phone_number": "+1234567890"
   }'
 ```
+
+
+### Create a Job
+```bash
+curl -X POST http://localhost:8080/api/v1/jobs \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Software Engineer",
+    "company_name": "Google",
+    "location": "Remote",
+    "platform": "LinkedIn",
+    "link": "https://careers.google.com/jobs/123",
+    "notes": "Referred by a friend",
+    "status": "applied",
+    "date_applied": "2026-02-10"
+  }'
+```
+
+### Get All Jobs
+```bash
+curl -X GET http://localhost:8080/api/v1/jobs \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Get Job by ID
+```bash
+curl -X GET http://localhost:8080/api/v1/jobs/42 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+### Update a Job
+```bash
+curl -X PUT http://localhost:8080/api/v1/jobs/42 \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Senior Software Engineer",
+    "status": "interviewing"
+  }'
+```
+
+### Delete a Job
+```bash
+curl -X DELETE http://localhost:8080/api/v1/jobs/42 \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+---
 
 ## Run Tests
 

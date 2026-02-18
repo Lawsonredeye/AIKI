@@ -2,8 +2,6 @@ package domain
 
 import (
 	"time"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // User represents a user in the system
@@ -22,11 +20,11 @@ type User struct {
 
 // UserProfile Details
 type UserProfile struct {
-	UserId          int32            `json:"user_id"`
-	FullName        string           `json:"full_name"`
-	CurrentJob      string           `json:"current_job"`
-	ExperienceLevel string           `json:"experience_level"`
-	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
+	UserId          int32     `json:"user_id"`
+	FullName        string    `json:"full_name"`
+	CurrentJob      string    `json:"current_job"`
+	ExperienceLevel string    `json:"experience_level"`
+	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type UserProfileRequest struct {

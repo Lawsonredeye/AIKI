@@ -1,6 +1,7 @@
 package response
 
 import (
+	"errors"
 	"net/http"
 
 	"aiki/internal/domain"
@@ -42,3 +43,11 @@ func ValidationError(c echo.Context, message string) error {
 		Error:   message,
 	})
 }
+
+var (
+	ErrSessionNotFound      = errors.New("focus session not found")
+	ErrSessionAlreadyActive = errors.New("you already have an active focus session")
+	ErrSessionNotActive     = errors.New("focus session is not active")
+	ErrInvalidSessionStatus = errors.New("invalid session status transition")
+	ErrStreakNotFound       = errors.New("streak record not found")
+)
