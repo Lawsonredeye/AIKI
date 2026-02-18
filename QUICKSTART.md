@@ -1,6 +1,6 @@
 # Quick Start Guide - Aiki Backend.
 
-## Prerequisites
+## Prerequisites.
 - Docker & Docker Compose installed
 - Go 1.24+ installed
 - Make (optional)
