@@ -269,6 +269,38 @@ definitions:
       name:
         type: string
     type: object
+  domain.UserProfile:
+    properties:
+      current_job:
+        type: string
+      experience_level:
+        type: string
+      full_name:
+        type: string
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
+  domain.UserProfileRequest:
+    properties:
+      current_job:
+        maxLength: 200
+        minLength: 5
+        type: string
+      experience_level:
+        maxLength: 200
+        minLength: 5
+        type: string
+      full_name:
+        maxLength: 200
+        minLength: 7
+        type: string
+    required:
+    - current_job
+    - experience_level
+    - full_name
+    type: object
   response.Response:
     properties:
       data: {}
@@ -1035,6 +1067,119 @@ paths:
       security:
       - BearerAuth: []
       summary: Update current user
+      tags:
+      - users
+  /users/profile:
+    patch:
+      consumes:
+      - application/json
+      description: Update the currently authenticated user's profile details
+      parameters:
+      - description: Updated profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserProfile'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Update user profile
+      tags:
+      - users
+    post:
+      consumes:
+      - application/json
+      description: Create a profile for the currently authenticated user
+      parameters:
+      - description: Profile details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserProfileRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserProfile'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Create user profile
+      tags:
+      - users
+  /users/upload/cv:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Upload a CV file (PDF, max 5MB) for the currently authenticated
+        user
+      parameters:
+      - description: CV file
+        in: formData
+        name: cv
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+      security:
+      - BearerAuth: []
+      summary: Upload CV
       tags:
       - users
 securityDefinitions:

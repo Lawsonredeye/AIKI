@@ -22,18 +22,17 @@ func NewUserHandler(userService service.UserService, validator echo.Validator) *
 }
 
 // GetMe godoc
-// @Summary Get current user
-// @Description Get the currently authenticated user's profile
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Success 200 {object} response.Response{data=domain.User}
-// @Failure 401 {object} response.Response
-// @Failure 404 {object} response.Response
-// @Router /users/me [get]
+// @Summary      Get current user
+// @Description  Get the currently authenticated user's profile
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} response.Response{data=domain.User}
+// @Failure      401 {object} response.Response
+// @Failure      404 {object} response.Response
+// @Router       /users/me [get]
 func (h *UserHandler) GetMe(c echo.Context) error {
-	// Get user ID from JWT claims (set by auth middleware)
 	userID, ok := c.Get("user_id").(int32)
 	if !ok {
 		return response.Error(c, domain.ErrUnauthorized)
@@ -48,20 +47,19 @@ func (h *UserHandler) GetMe(c echo.Context) error {
 }
 
 // UpdateMe godoc
-// @Summary Update current user
-// @Description Update the currently authenticated user's profile
-// @Tags users
-// @Accept json
-// @Produce json
-// @Security BearerAuth
-// @Param request body domain.UpdateUserRequest true "Update user details"
-// @Success 200 {object} response.Response{data=domain.User}
-// @Failure 400 {object} response.Response
-// @Failure 401 {object} response.Response
-// @Failure 404 {object} response.Response
-// @Router /users/me [put]
+// @Summary      Update current user
+// @Description  Update the currently authenticated user's profile
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body domain.UpdateUserRequest true "Update user details"
+// @Success      200 {object} response.Response{data=domain.User}
+// @Failure      400 {object} response.Response
+// @Failure      401 {object} response.Response
+// @Failure      404 {object} response.Response
+// @Router       /users/me [put]
 func (h *UserHandler) UpdateMe(c echo.Context) error {
-	// Get user ID from JWT claims
 	userID, ok := c.Get("user_id").(int32)
 	if !ok {
 		return response.Error(c, domain.ErrUnauthorized)
@@ -84,6 +82,19 @@ func (h *UserHandler) UpdateMe(c echo.Context) error {
 	return response.Success(c, http.StatusOK, "user updated successfully", user)
 }
 
+// CreateProfile godoc
+// @Summary      Create user profile
+// @Description  Create a profile for the currently authenticated user
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body domain.UserProfileRequest true "Profile details"
+// @Success      200 {object} response.Response{data=domain.UserProfile}
+// @Failure      400 {object} response.Response
+// @Failure      401 {object} response.Response
+// @Failure      409 {object} response.Response
+// @Router       /users/profile [post]
 func (h *UserHandler) CreateProfile(c echo.Context) error {
 	id, ok := c.Get("user_id").(int32)
 	if !ok {
@@ -110,6 +121,19 @@ func (h *UserHandler) CreateProfile(c echo.Context) error {
 	return response.Success(c, http.StatusOK, "user profile successfully", user)
 }
 
+// UpdateProfile godoc
+// @Summary      Update user profile
+// @Description  Update the currently authenticated user's profile details
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Param        request body domain.UserProfileRequest true "Updated profile details"
+// @Success      200 {object} response.Response{data=domain.UserProfile}
+// @Failure      400 {object} response.Response
+// @Failure      401 {object} response.Response
+// @Failure      404 {object} response.Response
+// @Router       /users/profile [patch]
 func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	id, ok := c.Get("user_id").(int32)
 	if !ok {
@@ -133,6 +157,18 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	return response.Success(c, http.StatusOK, "user profile successfully", profile)
 }
 
+// UploadCV godoc
+// @Summary      Upload CV
+// @Description  Upload a CV file (PDF, max 5MB) for the currently authenticated user
+// @Tags         users
+// @Accept       multipart/form-data
+// @Produce      json
+// @Security     BearerAuth
+// @Param        cv formData file true "CV file"
+// @Success      200 {object} response.Response
+// @Failure      400 {object} response.Response
+// @Failure      401 {object} response.Response
+// @Router       /users/upload/cv [post]
 func (h *UserHandler) UploadCV(c echo.Context) error {
 	id, ok := c.Get("user_id").(int32)
 	if !ok {
