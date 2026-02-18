@@ -84,7 +84,7 @@ func (s *jobService) GetAllByUserID(ctx context.Context, userId int32) ([]domain
 			UserId:    dbJob.UserID,
 			Title:     dbJob.Title,
 			Status:    dbJob.Status,
-			CreatedAt: dbJob.CreatedAt,
+			CreatedAt: dbJob.CreatedAt.Time,
 		}
 
 		// Handle nullable fields

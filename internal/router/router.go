@@ -14,6 +14,7 @@ func Setup(
 	authHandler *handler.AuthHandler,
 	userHandler *handler.UserHandler,
 	jobHandler *handler.JobHandler,
+	homeHandler *handler.HomeHandler,
 	jwtManager *jwt.Manager,
 ) {
 	// API v1 group
@@ -34,7 +35,7 @@ func Setup(
 		auth.POST("/login", authHandler.Login)
 		auth.POST("/refresh", authHandler.RefreshToken)
 		auth.POST("/logout", authHandler.Logout)
-		auth.GET("/linkedin/login", authHandler.LinkedInLogin) // New LinkedIn login route
+		auth.GET("/linkedin/login", authHandler.LinkedInLogin)
 		// auth.GET("/linkedin/callback", authHandler.LinkedInCallback) // TODO: add New LinkedIn callback route
 		auth.POST("/forgot-password", authHandler.ForgottenPassword)
 		auth.POST("/forgot-password/validate", authHandler.ValidateForgottenPasswordOTP)
@@ -61,5 +62,46 @@ func Setup(
 		jobs.GET("/:id", jobHandler.GetJob)
 		jobs.PUT("/:id", jobHandler.UpdateJob)
 		jobs.DELETE("/:id", jobHandler.DeleteJob)
+	}
+
+	// Home screen (auth required)
+	home := api.Group("/home")
+	home.Use(middleware.Auth(jwtManager))
+	{
+		home.GET("", homeHandler.GetHomeScreen)
+	}
+
+	// Focus sessions (auth required)
+	sessions := api.Group("/sessions")
+	sessions.Use(middleware.Auth(jwtManager))
+	{
+		sessions.POST("", homeHandler.StartSession)
+		sessions.GET("", homeHandler.GetSessionHistory)
+		sessions.GET("/active", homeHandler.GetActiveSession)
+		sessions.PATCH("/:id/pause", homeHandler.PauseSession)
+		sessions.PATCH("/:id/resume", homeHandler.ResumeSession)
+		sessions.PATCH("/:id/end", homeHandler.EndSession)
+	}
+
+	// Streaks (auth required)
+	streaks := api.Group("/streaks")
+	streaks.Use(middleware.Auth(jwtManager))
+	{
+		streaks.GET("", homeHandler.GetStreak)
+	}
+
+	// Badges (auth required)
+	badges := api.Group("/badges")
+	badges.Use(middleware.Auth(jwtManager))
+	{
+		badges.GET("", homeHandler.GetAllBadges)
+		badges.GET("/me", homeHandler.GetUserBadges)
+	}
+
+	// Progress stats (auth required)
+	progress := api.Group("/progress")
+	progress.Use(middleware.Auth(jwtManager))
+	{
+		progress.GET("", homeHandler.GetProgress)
 	}
 }

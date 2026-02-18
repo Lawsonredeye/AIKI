@@ -103,7 +103,7 @@ func (jr *jobRepository) GetJobByID(ctx context.Context, jobId int32) (*domain.J
 		Location:    *job.Location,
 		Status:      job.Status,
 		Link:        *job.Link,
-		CreatedAt:   job.CreatedAt,
+		CreatedAt:   job.CreatedAt.Time,
 	}, nil
 }
 

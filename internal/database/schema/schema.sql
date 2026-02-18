@@ -74,3 +74,90 @@ CREATE TABLE IF NOT EXISTS jobs (
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
+
+
+-- ============================================================
+-- Home Screen Features Migration
+-- Focus Sessions, Streaks, Badges, Progress Stats
+-- ============================================================
+
+-- Focus sessions table (Lock-in sessions)
+CREATE TABLE IF NOT EXISTS focus_sessions (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    duration_seconds INT NOT NULL DEFAULT 0,   -- total planned duration
+    elapsed_seconds INT NOT NULL DEFAULT 0,    -- how much was completed
+    status VARCHAR(20) NOT NULL DEFAULT 'active', -- active | paused | completed | abandoned
+    started_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    ended_at TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_focus_sessions_user_id ON focus_sessions(user_id);
+CREATE INDEX idx_focus_sessions_status ON focus_sessions(status);
+CREATE INDEX idx_focus_sessions_started_at ON focus_sessions(started_at);
+
+CREATE TRIGGER update_focus_sessions_updated_at BEFORE UPDATE ON focus_sessions
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Streaks table
+CREATE TABLE IF NOT EXISTS streaks (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL UNIQUE REFERENCES users(id) ON DELETE CASCADE,
+    current_streak INT NOT NULL DEFAULT 0,
+    longest_streak INT NOT NULL DEFAULT 0,
+    last_session_date DATE,
+    updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_streaks_user_id ON streaks(user_id);
+
+-- Badge definitions (static catalog)
+CREATE TABLE IF NOT EXISTS badge_definitions (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description TEXT,
+    icon_key VARCHAR(100),        -- frontend icon key / emoji slug
+    criteria_type VARCHAR(50) NOT NULL, -- streak | sessions | focus_time | jobs
+    criteria_value INT NOT NULL,        -- threshold value to unlock
+    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
+-- User earned badges
+CREATE TABLE IF NOT EXISTS user_badges (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    badge_id INT NOT NULL REFERENCES badge_definitions(id) ON DELETE CASCADE,
+    earned_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (user_id, badge_id)
+);
+
+CREATE INDEX idx_user_badges_user_id ON user_badges(user_id);
+
+-- Progress stats (aggregated per day for fast reads)
+CREATE TABLE IF NOT EXISTS daily_progress (
+    id SERIAL PRIMARY KEY,
+    user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    date DATE NOT NULL,
+    total_focus_seconds INT NOT NULL DEFAULT 0,
+    sessions_completed INT NOT NULL DEFAULT 0,
+    UNIQUE (user_id, date)
+);
+
+CREATE INDEX idx_daily_progress_user_id ON daily_progress(user_id);
+CREATE INDEX idx_daily_progress_date ON daily_progress(date);
+
+-- ============================================================
+-- Seed badge definitions
+-- ============================================================
+INSERT INTO badge_definitions (name, description, icon_key, criteria_type, criteria_value) VALUES
+    ('First Lock-in',   'Complete your first focus session',          'first_session',  'sessions',    1),
+    ('3-Day Streak',    'Maintain a 3-day streak',                    'streak_3',       'streak',      3),
+    ('7-Day Streak',    'Maintain a 7-day streak',                    'streak_7',       'streak',      7),
+    ('30-Day Streak',   'Maintain a 30-day streak',                   'streak_30',      'streak',     30),
+    ('Focus Rookie',    'Accumulate 1 hour of total focus time',      'focus_1h',       'focus_time', 3600),
+    ('Focus Pro',       'Accumulate 10 hours of total focus time',    'focus_10h',      'focus_time', 36000),
+    ('Job Hunter',      'Track 5 job applications',                   'job_hunter',     'jobs',        5),
+    ('Consistency',     'Complete 10 focus sessions',                 'sessions_10',    'sessions',   10)
+ON CONFLICT (name) DO NOTHING;

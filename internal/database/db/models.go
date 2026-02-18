@@ -8,6 +8,36 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type BadgeDefinition struct {
+	ID            int32            `json:"id"`
+	Name          string           `json:"name"`
+	Description   *string          `json:"description"`
+	IconKey       *string          `json:"icon_key"`
+	CriteriaType  string           `json:"criteria_type"`
+	CriteriaValue int32            `json:"criteria_value"`
+	CreatedAt     pgtype.Timestamp `json:"created_at"`
+}
+
+type DailyProgress struct {
+	ID                int32       `json:"id"`
+	UserID            int32       `json:"user_id"`
+	Date              pgtype.Date `json:"date"`
+	TotalFocusSeconds int32       `json:"total_focus_seconds"`
+	SessionsCompleted int32       `json:"sessions_completed"`
+}
+
+type FocusSession struct {
+	ID              int32            `json:"id"`
+	UserID          int32            `json:"user_id"`
+	DurationSeconds int32            `json:"duration_seconds"`
+	ElapsedSeconds  int32            `json:"elapsed_seconds"`
+	Status          string           `json:"status"`
+	StartedAt       pgtype.Timestamp `json:"started_at"`
+	EndedAt         pgtype.Timestamp `json:"ended_at"`
+	CreatedAt       pgtype.Timestamp `json:"created_at"`
+	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
+}
+
 type Job struct {
 	ID          int32            `json:"id"`
 	UserID      int32            `json:"user_id"`
@@ -31,6 +61,15 @@ type RefreshToken struct {
 	CreatedAt pgtype.Timestamp `json:"created_at"`
 }
 
+type Streak struct {
+	ID              int32            `json:"id"`
+	UserID          int32            `json:"user_id"`
+	CurrentStreak   int32            `json:"current_streak"`
+	LongestStreak   int32            `json:"longest_streak"`
+	LastSessionDate pgtype.Date      `json:"last_session_date"`
+	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
+}
+
 type User struct {
 	ID           int32            `json:"id"`
 	FirstName    string           `json:"first_name"`
@@ -42,6 +81,13 @@ type User struct {
 	IsActive     *bool            `json:"is_active"`
 	CreatedAt    pgtype.Timestamp `json:"created_at"`
 	UpdatedAt    pgtype.Timestamp `json:"updated_at"`
+}
+
+type UserBadge struct {
+	ID       int32            `json:"id"`
+	UserID   int32            `json:"user_id"`
+	BadgeID  int32            `json:"badge_id"`
+	EarnedAt pgtype.Timestamp `json:"earned_at"`
 }
 
 type UserProfile struct {

@@ -1,19 +1,21 @@
 package domain
 
-import "github.com/jackc/pgx/v5/pgtype"
+import (
+	"time"
+)
 
 type Job struct {
-	ID          int32            `json:"id"`
-	UserId      int32            `json:"user_id"`
-	Title       string           `json:"title"`
-	CompanyName string           `json:"company_name"`
-	Location    string           `json:"location"`
-	Platform    string           `json:"platform"` // could be linkedin, website or indeed or others
-	Link        string           `json:"link"`
-	Status      string           `json:"status"`
-	Notes       string           `json:"notes"`
-	DateApplied string           `json:"date_applied"`
-	CreatedAt   pgtype.Timestamp `json:"created_at"`
+	ID          int32     `json:"id"`
+	UserId      int32     `json:"user_id"`
+	Title       string    `json:"title"`
+	CompanyName string    `json:"company_name"`
+	Location    string    `json:"location"`
+	Platform    string    `json:"platform"` // could be linkedin, website or indeed or others
+	Link        string    `json:"link"`
+	Status      string    `json:"status"`
+	Notes       string    `json:"notes"`
+	DateApplied string    `json:"date_applied"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
 type JobRequest struct {
