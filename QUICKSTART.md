@@ -7,7 +7,7 @@
 
 ## Setup (5 minutes)
 
-### 1. Start Database Services
+### 1. Start Database Services.
 ```bash
 docker-compose up -d # if you use v1
 docker compose up -d # if you use v2
