@@ -9,7 +9,9 @@ import (
 )
 
 type Querier interface {
+	AwardBadge(ctx context.Context, arg AwardBadgeParams) error
 	CheckEmailExists(ctx context.Context, email string) (bool, error)
+	CreateFocusSession(ctx context.Context, arg CreateFocusSessionParams) (FocusSession, error)
 	CreateJob(ctx context.Context, arg CreateJobParams) (Job, error)
 	CreateRefreshToken(ctx context.Context, arg CreateRefreshTokenParams) (RefreshToken, error)
 	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
@@ -19,16 +21,27 @@ type Querier interface {
 	DeleteJobByID(ctx context.Context, id int32) error
 	DeleteRefreshToken(ctx context.Context, token string) error
 	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
+	GetActiveSession(ctx context.Context, userID int32) (FocusSession, error)
+	GetAllBadgeDefinitions(ctx context.Context) ([]BadgeDefinition, error)
+	GetFocusSessionByID(ctx context.Context, id int32) (FocusSession, error)
 	GetJobByID(ctx context.Context, id int32) (Job, error)
 	GetJobs(ctx context.Context, userID int32) ([]Job, error)
+	GetProgressSummary(ctx context.Context, arg GetProgressSummaryParams) (GetProgressSummaryRow, error)
 	GetRefreshToken(ctx context.Context, token string) (RefreshToken, error)
+	GetStreak(ctx context.Context, userID int32) (Streak, error)
+	GetUserBadgeCount(ctx context.Context, userID int32) (int64, error)
+	GetUserBadges(ctx context.Context, userID int32) ([]GetUserBadgesRow, error)
 	GetUserByEmail(ctx context.Context, email string) (User, error)
 	GetUserByID(ctx context.Context, id int32) (User, error)
 	GetUserProfileByUserID(ctx context.Context, userID int32) (UserProfile, error)
+	GetUserSessionHistory(ctx context.Context, arg GetUserSessionHistoryParams) ([]FocusSession, error)
+	UpdateFocusSession(ctx context.Context, arg UpdateFocusSessionParams) (FocusSession, error)
 	UpdateJobByID(ctx context.Context, arg UpdateJobByIDParams) error
 	UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error)
 	UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (UserProfile, error)
 	UploadUserCV(ctx context.Context, arg UploadUserCVParams) (UserProfile, error)
+	UpsertDailyProgress(ctx context.Context, arg UpsertDailyProgressParams) error
+	UpsertStreak(ctx context.Context, arg UpsertStreakParams) (Streak, error)
 }
 
 var _ Querier = (*Queries)(nil)
