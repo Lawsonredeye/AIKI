@@ -27,8 +27,8 @@ type UserRepository interface {
 	DeleteRefreshToken(ctx context.Context, token string) error
 	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
 	UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error
-	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
-	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
+	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error)
+	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error)
 	GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error)
 	UploadCV(ctx context.Context, userId int32, data []byte) error
 	GetByLinkedInID(ctx context.Context, linkedInID string) (*domain.User, error)
@@ -232,12 +232,13 @@ func (r *userRepository) UpdateUserPassword(ctx context.Context, userID int32, n
 	return err
 }
 
-func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	profile, err := r.queries.CreateUserProfile(ctx, db.CreateUserProfileParams{
 		UserID:          userId,
 		FullName:        fullName,
 		CurrentJob:      currentJob,
 		ExperienceLevel: experienceLevel,
+		Goals:           goals,
 	})
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -252,12 +253,24 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 		fmt.Println("Error creating user profile:", err)
 		return nil, domain.ErrUserProfileNotCreated
 	}
+	var fullname, currentjob, experience string
+	if profile.FullName != nil {
+		fullname = *profile.FullName
+	}
+	if profile.CurrentJob != nil {
+		currentjob = *profile.CurrentJob
+	}
+	if profile.ExperienceLevel != nil {
+		experience = *profile.ExperienceLevel
+	}
+
 	fmt.Println("User profile created successfully")
 	return &domain.UserProfile{
 		UserId:          profile.UserID,
-		FullName:        *profile.FullName,
-		CurrentJob:      *profile.CurrentJob,
-		ExperienceLevel: *profile.ExperienceLevel,
+		FullName:        fullname,
+		CurrentJob:      currentjob,
+		ExperienceLevel: experience,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
@@ -271,21 +284,34 @@ func (r *userRepository) GetUserProfileByID(ctx context.Context, userId int32) (
 		}
 		return nil, err
 	}
+	var fullname, currentjob, experience string
+	if profile.FullName != nil {
+		fullname = *profile.FullName
+	}
+	if profile.CurrentJob != nil {
+		currentjob = *profile.CurrentJob
+	}
+	if profile.ExperienceLevel != nil {
+		experience = *profile.ExperienceLevel
+	}
+
 	return &domain.UserProfile{
 		UserId:          profile.UserID,
-		FullName:        *profile.FullName,
-		CurrentJob:      *profile.CurrentJob,
-		ExperienceLevel: *profile.ExperienceLevel,
+		FullName:        fullname,
+		CurrentJob:      currentjob,
+		ExperienceLevel: experience,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
 
-func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	profile, err := r.queries.UpdateUserProfile(ctx, db.UpdateUserProfileParams{
 		UserID:          userId,
 		FullName:        fullName,
 		CurrentJob:      currentJob,
 		ExperienceLevel: experienceLevel,
+		Goals:           goals,
 	})
 	if err != nil {
 		return nil, err
@@ -296,6 +322,7 @@ func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fu
 		FullName:        *profile.FullName,
 		CurrentJob:      *profile.CurrentJob,
 		ExperienceLevel: *profile.ExperienceLevel,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }

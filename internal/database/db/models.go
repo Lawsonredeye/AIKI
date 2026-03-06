@@ -123,5 +123,6 @@ type UserProfile struct {
 	FullName        *string          `json:"full_name"`
 	CurrentJob      *string          `json:"current_job"`
 	ExperienceLevel *string          `json:"experience_level"`
+	Goals           []string         `json:"goals"`
 	UpdatedAt       pgtype.Timestamp `json:"updated_at"`
 }

@@ -25,12 +25,12 @@ func (m *MockUserRepository) UpdateUserPassword(ctx context.Context, userID int3
 	panic("implement me")
 }
 
-func (m *MockUserRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (m *MockUserRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *MockUserRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (m *MockUserRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	//TODO implement me
 	panic("implement me")
 }

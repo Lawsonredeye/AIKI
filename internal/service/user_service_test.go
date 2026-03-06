@@ -112,6 +112,7 @@ func TestUserService_Update(t *testing.T) {
 			ID: userID,
 
 			Email:        "jane@example.com",
+			FirstName:    &newFirstName,
 			PhoneNumber:  &newPhone,
 			PasswordHash: &passwd,
 			IsActive:     true,
@@ -124,7 +125,7 @@ func TestUserService_Update(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.NotNil(t, user)
-		assert.Equal(t, newFirstName, user.FirstName)
+		assert.Equal(t, &newFirstName, user.FirstName)
 		assert.Equal(t, &newPhone, user.PhoneNumber)
 		assert.Empty(t, user.PasswordHash)
 		mockRepo.AssertExpectations(t)

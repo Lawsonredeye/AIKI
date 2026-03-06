@@ -112,6 +112,7 @@ func (h *UserHandler) CreateProfile(c echo.Context) error {
 		FullName:        req.FullName,
 		CurrentJob:      req.CurrentJob,
 		ExperienceLevel: req.ExperienceLevel,
+		Goals:           req.Goals,
 	}
 
 	user, err := h.userService.CreateUserProfile(c.Request().Context(), pf)
