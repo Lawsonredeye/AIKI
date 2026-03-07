@@ -25,7 +25,13 @@ func setupTestDB(t *testing.T) *pgxpool.Pool {
 
 	ctx := context.Background()
 	pool, err := pgxpool.New(ctx, connString)
-	require.NoError(t, err)
+	if err != nil {
+		t.Skipf("Skipping integration test: database connection failed: %v", err)
+	}
+
+	if err := pool.Ping(ctx); err != nil {
+		t.Skipf("Skipping integration test: database not reachable: %v", err)
+	}
 
 	// Clean up test data
 	t.Cleanup(func() {
@@ -201,6 +207,8 @@ func TestUserRepository_CreateUserProfile(t *testing.T) {
 	user := &domain.User{
 
 		Email:       "john.doe@test.com",
+		FirstName:   stringPtr("John"),
+		LastName:    stringPtr("Doe"),
 		PhoneNumber: stringPtr("+1234567890"),
 	}
 
@@ -217,7 +225,7 @@ func TestUserRepository_CreateUserProfile(t *testing.T) {
 	fullName := stringPtr(profile.FullName)
 	xpLevel := stringPtr(profile.ExperienceLevel)
 	currentJob := stringPtr(profile.CurrentJob)
-	createdProfile, err := repo.CreateUserProfile(ctx, createdUser.ID, fullName, currentJob, xpLevel)
+	createdProfile, err := repo.CreateUserProfile(ctx, createdUser.ID, fullName, currentJob, xpLevel, []string{"Career growth"})
 	assert.NoError(t, err)
 	assert.NotNil(t, createdProfile)
 	assert.Equal(t, createdUser.ID, createdProfile.UserId)
@@ -230,6 +238,8 @@ func TestUserRepository_GetUserProfile(t *testing.T) {
 	user := &domain.User{
 
 		Email:       "test@test.com",
+		FirstName:   stringPtr("Test"),
+		LastName:    stringPtr("User"),
 		PhoneNumber: stringPtr("+1234567890"),
 	}
 
@@ -242,7 +252,7 @@ func TestUserRepository_GetUserProfile(t *testing.T) {
 		CurrentJob:      "backend developer",
 		ExperienceLevel: "beginner",
 	}
-	createUserProfile, err := repo.CreateUserProfile(ctx, pf.UserId, &pf.FullName, &pf.CurrentJob, &pf.ExperienceLevel)
+	createUserProfile, err := repo.CreateUserProfile(ctx, pf.UserId, &pf.FullName, &pf.CurrentJob, &pf.ExperienceLevel, []string{"Find a job"})
 	assert.NoError(t, err)
 	assert.Equal(t, createdUser.ID, createUserProfile.UserId)
 	profile, err := repo.GetUserProfileByID(ctx, createdUser.ID)

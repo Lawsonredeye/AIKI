@@ -345,6 +345,10 @@ definitions:
         type: string
       full_name:
         type: string
+      goals:
+        items:
+          type: string
+        type: array
       updated_at:
         type: string
       user_id:
@@ -364,10 +368,16 @@ definitions:
         maxLength: 200
         minLength: 7
         type: string
+      goals:
+        items:
+          type: string
+        minItems: 1
+        type: array
     required:
     - current_job
     - experience_level
     - full_name
+    - goals
     type: object
   response.Response:
     properties:
@@ -388,6 +398,48 @@ info:
   title: Aiki API
   version: "1.0"
 paths:
+  /auth/linkedin/callback:
+    get:
+      description: Exchanges authorization code for tokens and logs in/registers the
+        user
+      parameters:
+      - description: Authorization code from LinkedIn
+        in: query
+        name: code
+        required: true
+        type: string
+      - description: CSRF state parameter
+        in: query
+        name: state
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.AuthResponse'
+              type: object
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.Response'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.Response'
+      summary: Handle LinkedIn OAuth callback
+      tags:
+      - auth
   /auth/linkedin/login:
     get:
       description: Redirects user to LinkedIn for authentication

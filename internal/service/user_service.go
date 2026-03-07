@@ -66,7 +66,7 @@ func (s *userService) Update(ctx context.Context, id int32, req *domain.UpdateUs
 // ========================================================
 
 func (s *userService) CreateUserProfile(ctx context.Context, userProfile domain.UserProfile) (*domain.UserProfile, error) {
-	profile, err := s.userRepo.CreateUserProfile(ctx, userProfile.UserId, &userProfile.FullName, &userProfile.CurrentJob, &userProfile.ExperienceLevel)
+	profile, err := s.userRepo.CreateUserProfile(ctx, userProfile.UserId, &userProfile.FullName, &userProfile.CurrentJob, &userProfile.ExperienceLevel, userProfile.Goals)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,10 @@ func (s *userService) UpdateUserProfile(ctx context.Context, user domain.UserPro
 	if &user.ExperienceLevel != nil && len(user.ExperienceLevel) > 5 {
 		userProfile.ExperienceLevel = user.ExperienceLevel
 	}
-	profile, err := s.userRepo.UpdateUserProfile(ctx, userProfile.UserId, &userProfile.FullName, &userProfile.CurrentJob, &userProfile.ExperienceLevel)
+	if len(user.Goals) > 0 {
+		userProfile.Goals = user.Goals
+	}
+	profile, err := s.userRepo.UpdateUserProfile(ctx, userProfile.UserId, &userProfile.FullName, &userProfile.CurrentJob, &userProfile.ExperienceLevel, userProfile.Goals)
 	if err != nil {
 		return nil, err
 	}
