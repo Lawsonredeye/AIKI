@@ -47,6 +47,7 @@ CREATE TABLE IF NOT EXISTS user_profile (
     full_name VARCHAR(200),
     current_job VARCHAR(255),
     experience_level VARCHAR(100),
+    goals TEXT[] DEFAULT '{}',
     updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 

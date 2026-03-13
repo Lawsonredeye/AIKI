@@ -25,12 +25,12 @@ func (m *MockUserRepository) UpdateUserPassword(ctx context.Context, userID int3
 	panic("implement me")
 }
 
-func (m *MockUserRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (m *MockUserRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (m *MockUserRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (m *MockUserRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	//TODO implement me
 	panic("implement me")
 }
@@ -99,6 +99,27 @@ func (m *MockUserRepository) DeleteUserRefreshTokens(ctx context.Context, userID
 func (m *MockUserRepository) UploadCV(ctx context.Context, userID int32, data []byte) error {
 	//TODO implement me
 	panic("implement me")
+}
+
+func (m *MockUserRepository) GetByLinkedInID(ctx context.Context, linkedInID string) (*domain.User, error) {
+	args := m.Called(ctx, linkedInID)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
+func (m *MockUserRepository) CreateLinkedInUser(ctx context.Context, email, linkedInID string, firstName, lastName *string) (*domain.User, error) {
+	args := m.Called(ctx, email, linkedInID, firstName, lastName)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*domain.User), args.Error(1)
+}
+
+func (m *MockUserRepository) UpdateLinkedInID(ctx context.Context, userID int32, linkedInID string, firstName, lastName *string) error {
+	args := m.Called(ctx, userID, linkedInID, firstName, lastName)
+	return args.Error(0)
 }
 
 func TestAuthService_Register(t *testing.T) {

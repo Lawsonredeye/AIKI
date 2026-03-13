@@ -27,10 +27,13 @@ type UserRepository interface {
 	DeleteRefreshToken(ctx context.Context, token string) error
 	DeleteUserRefreshTokens(ctx context.Context, userID int32) error
 	UpdateUserPassword(ctx context.Context, userID int32, newPasswordHash string) error
-	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
-	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error)
+	CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error)
+	UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error)
 	GetUserProfileByID(ctx context.Context, userId int32) (*domain.UserProfile, error)
 	UploadCV(ctx context.Context, userId int32, data []byte) error
+	GetByLinkedInID(ctx context.Context, linkedInID string) (*domain.User, error)
+	CreateLinkedInUser(ctx context.Context, email, linkedInID string, firstName, lastName *string) (*domain.User, error)
+	UpdateLinkedInID(ctx context.Context, userID int32, linkedInID string, firstName, lastName *string) error
 }
 
 type userRepository struct {
@@ -229,12 +232,13 @@ func (r *userRepository) UpdateUserPassword(ctx context.Context, userID int32, n
 	return err
 }
 
-func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	profile, err := r.queries.CreateUserProfile(ctx, db.CreateUserProfileParams{
 		UserID:          userId,
 		FullName:        fullName,
 		CurrentJob:      currentJob,
 		ExperienceLevel: experienceLevel,
+		Goals:           goals,
 	})
 	if err != nil {
 		var pgErr *pgconn.PgError
@@ -249,12 +253,24 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 		fmt.Println("Error creating user profile:", err)
 		return nil, domain.ErrUserProfileNotCreated
 	}
+	var fullname, currentjob, experience string
+	if profile.FullName != nil {
+		fullname = *profile.FullName
+	}
+	if profile.CurrentJob != nil {
+		currentjob = *profile.CurrentJob
+	}
+	if profile.ExperienceLevel != nil {
+		experience = *profile.ExperienceLevel
+	}
+
 	fmt.Println("User profile created successfully")
 	return &domain.UserProfile{
 		UserId:          profile.UserID,
-		FullName:        *profile.FullName,
-		CurrentJob:      *profile.CurrentJob,
-		ExperienceLevel: *profile.ExperienceLevel,
+		FullName:        fullname,
+		CurrentJob:      currentjob,
+		ExperienceLevel: experience,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
@@ -268,21 +284,34 @@ func (r *userRepository) GetUserProfileByID(ctx context.Context, userId int32) (
 		}
 		return nil, err
 	}
+	var fullname, currentjob, experience string
+	if profile.FullName != nil {
+		fullname = *profile.FullName
+	}
+	if profile.CurrentJob != nil {
+		currentjob = *profile.CurrentJob
+	}
+	if profile.ExperienceLevel != nil {
+		experience = *profile.ExperienceLevel
+	}
+
 	return &domain.UserProfile{
 		UserId:          profile.UserID,
-		FullName:        *profile.FullName,
-		CurrentJob:      *profile.CurrentJob,
-		ExperienceLevel: *profile.ExperienceLevel,
+		FullName:        fullname,
+		CurrentJob:      currentjob,
+		ExperienceLevel: experience,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
 
-func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string) (*domain.UserProfile, error) {
+func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fullName, currentJob, experienceLevel *string, goals []string) (*domain.UserProfile, error) {
 	profile, err := r.queries.UpdateUserProfile(ctx, db.UpdateUserProfileParams{
 		UserID:          userId,
 		FullName:        fullName,
 		CurrentJob:      currentJob,
 		ExperienceLevel: experienceLevel,
+		Goals:           goals,
 	})
 	if err != nil {
 		return nil, err
@@ -293,6 +322,7 @@ func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fu
 		FullName:        *profile.FullName,
 		CurrentJob:      *profile.CurrentJob,
 		ExperienceLevel: *profile.ExperienceLevel,
+		Goals:           profile.Goals,
 		UpdatedAt:       profile.UpdatedAt.Time,
 	}, nil
 }
@@ -317,3 +347,82 @@ func (r *userRepository) UploadCV(ctx context.Context, userId int32, data []byte
 }
 
 //func (r *userRepository) GetCV(ctx context.Context, userId int32) (byt)
+
+func (r *userRepository) GetByLinkedInID(ctx context.Context, linkedInID string) (*domain.User, error) {
+	query := `
+		SELECT id, first_name, last_name, email, phone_number, password_hash, linkedin_id, is_active, created_at, updated_at
+		FROM users
+		WHERE linkedin_id = $1 AND is_active = TRUE
+		LIMIT 1
+	`
+
+	var user domain.User
+	err := r.db.QueryRow(ctx, query, linkedInID).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.PasswordHash,
+		&user.LinkedInID,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return nil, domain.ErrUserNotFound
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) CreateLinkedInUser(ctx context.Context, email, linkedInID string, firstName, lastName *string) (*domain.User, error) {
+	query := `
+		INSERT INTO users (email, linkedin_id, first_name, last_name)
+		VALUES ($1, $2, $3, $4)
+		RETURNING id, first_name, last_name, email, phone_number, password_hash, linkedin_id, is_active, created_at, updated_at
+	`
+
+	var user domain.User
+	err := r.db.QueryRow(ctx, query, email, linkedInID, firstName, lastName).Scan(
+		&user.ID,
+		&user.FirstName,
+		&user.LastName,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.PasswordHash,
+		&user.LinkedInID,
+		&user.IsActive,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) && pgErr.Code == "23505" {
+			return nil, domain.ErrEmailAlreadyExists
+		}
+		return nil, err
+	}
+
+	return &user, nil
+}
+
+func (r *userRepository) UpdateLinkedInID(ctx context.Context, userID int32, linkedInID string, firstName, lastName *string) error {
+	query := `
+		UPDATE users
+		SET
+			linkedin_id = $2,
+			first_name = COALESCE($3, first_name),
+			last_name = COALESCE($4, last_name),
+			updated_at = NOW()
+		WHERE id = $1 AND is_active = TRUE
+	`
+
+	_, err := r.db.Exec(ctx, query, userID, linkedInID, firstName, lastName)
+	return err
+}

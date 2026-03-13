@@ -24,13 +24,15 @@ type UserProfile struct {
 	FullName        string    `json:"full_name"`
 	CurrentJob      string    `json:"current_job"`
 	ExperienceLevel string    `json:"experience_level"`
+	Goals           []string  `json:"goals"`
 	UpdatedAt       time.Time `json:"updated_at"`
 }
 
 type UserProfileRequest struct {
-	FullName        string `json:"full_name" validate:"required,min=7,max=200"`
-	CurrentJob      string `json:"current_job" validate:"required,min=5,max=200"`
-	ExperienceLevel string `json:"experience_level" validate:"required,min=5,max=200"`
+	FullName        string   `json:"full_name" validate:"required,min=7,max=200"`
+	CurrentJob      string   `json:"current_job" validate:"required,min=5,max=200"`
+	ExperienceLevel string   `json:"experience_level" validate:"required,min=5,max=200"`
+	Goals           []string `json:"goals" validate:"required,min=1"`
 }
 
 // RegisterRequest represents the request to register a new user

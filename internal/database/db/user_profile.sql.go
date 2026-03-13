@@ -14,17 +14,19 @@ INSERT INTO user_profile (
     user_id,
     full_name,
     current_job,
-    experience_level
+    experience_level,
+    goals
 ) VALUES (
-    $1, $2, $3, $4
-) RETURNING id, user_id, cv, full_name, current_job, experience_level, updated_at
+    $1, $2, $3, $4, $5
+) RETURNING id, user_id, cv, full_name, current_job, experience_level, goals, updated_at
 `
 
 type CreateUserProfileParams struct {
-	UserID          int32   `json:"user_id"`
-	FullName        *string `json:"full_name"`
-	CurrentJob      *string `json:"current_job"`
-	ExperienceLevel *string `json:"experience_level"`
+	UserID          int32    `json:"user_id"`
+	FullName        *string  `json:"full_name"`
+	CurrentJob      *string  `json:"current_job"`
+	ExperienceLevel *string  `json:"experience_level"`
+	Goals           []string `json:"goals"`
 }
 
 func (q *Queries) CreateUserProfile(ctx context.Context, arg CreateUserProfileParams) (UserProfile, error) {
@@ -33,6 +35,7 @@ func (q *Queries) CreateUserProfile(ctx context.Context, arg CreateUserProfilePa
 		arg.FullName,
 		arg.CurrentJob,
 		arg.ExperienceLevel,
+		arg.Goals,
 	)
 	var i UserProfile
 	err := row.Scan(
@@ -42,13 +45,14 @@ func (q *Queries) CreateUserProfile(ctx context.Context, arg CreateUserProfilePa
 		&i.FullName,
 		&i.CurrentJob,
 		&i.ExperienceLevel,
+		&i.Goals,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getUserProfileByUserID = `-- name: GetUserProfileByUserID :one
-SELECT id, user_id, cv, full_name, current_job, experience_level, updated_at FROM user_profile
+SELECT id, user_id, cv, full_name, current_job, experience_level, goals, updated_at FROM user_profile
 WHERE user_id = $1
 LIMIT 1
 `
@@ -63,6 +67,7 @@ func (q *Queries) GetUserProfileByUserID(ctx context.Context, userID int32) (Use
 		&i.FullName,
 		&i.CurrentJob,
 		&i.ExperienceLevel,
+		&i.Goals,
 		&i.UpdatedAt,
 	)
 	return i, err
@@ -74,16 +79,18 @@ SET
     full_name = CASE WHEN $2::text IS NOT NULL THEN $2 ELSE full_name END,
     current_job = CASE WHEN $3::text IS NOT NULL THEN $3 ELSE current_job END,
     experience_level = CASE WHEN $4::text IS NOT NULL THEN $4 ELSE experience_level END,
+    goals = CASE WHEN $5::text[] IS NOT NULL THEN $5 ELSE goals END,
     updated_at = NOW()
 WHERE user_id = $1
-RETURNING id, user_id, cv, full_name, current_job, experience_level, updated_at
+RETURNING id, user_id, cv, full_name, current_job, experience_level, goals, updated_at
 `
 
 type UpdateUserProfileParams struct {
-	UserID          int32   `json:"user_id"`
-	FullName        *string `json:"full_name"`
-	CurrentJob      *string `json:"current_job"`
-	ExperienceLevel *string `json:"experience_level"`
+	UserID          int32    `json:"user_id"`
+	FullName        *string  `json:"full_name"`
+	CurrentJob      *string  `json:"current_job"`
+	ExperienceLevel *string  `json:"experience_level"`
+	Goals           []string `json:"goals"`
 }
 
 func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) (UserProfile, error) {
@@ -92,6 +99,7 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 		arg.FullName,
 		arg.CurrentJob,
 		arg.ExperienceLevel,
+		arg.Goals,
 	)
 	var i UserProfile
 	err := row.Scan(
@@ -101,6 +109,7 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 		&i.FullName,
 		&i.CurrentJob,
 		&i.ExperienceLevel,
+		&i.Goals,
 		&i.UpdatedAt,
 	)
 	return i, err
@@ -112,7 +121,7 @@ SET
     cv = $2,
     updated_at = NOW()
 WHERE user_id = $1
-RETURNING id, user_id, cv, full_name, current_job, experience_level, updated_at
+RETURNING id, user_id, cv, full_name, current_job, experience_level, goals, updated_at
 `
 
 type UploadUserCVParams struct {
@@ -130,6 +139,7 @@ func (q *Queries) UploadUserCV(ctx context.Context, arg UploadUserCVParams) (Use
 		&i.FullName,
 		&i.CurrentJob,
 		&i.ExperienceLevel,
+		&i.Goals,
 		&i.UpdatedAt,
 	)
 	return i, err
