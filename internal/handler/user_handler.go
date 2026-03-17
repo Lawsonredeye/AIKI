@@ -158,6 +158,31 @@ func (h *UserHandler) UpdateProfile(c echo.Context) error {
 	return response.Success(c, http.StatusOK, "user profile successfully", profile)
 }
 
+// GetProfile godoc
+// @Summary      Get user profile
+// @Description  Get the currently authenticated user's profile for onboarding tracking
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200 {object} response.Response{data=domain.UserProfile}
+// @Failure      401 {object} response.Response
+// @Failure      404 {object} response.Response
+// @Router       /users/profile [get]
+func (h *UserHandler) GetProfile(c echo.Context) error {
+	id, ok := c.Get("user_id").(int32)
+	if !ok {
+		return response.Error(c, domain.ErrUnauthorized)
+	}
+
+	profile, err := h.userService.GetUserProfile(c.Request().Context(), id)
+	if err != nil {
+		return response.Error(c, err)
+	}
+
+	return response.Success(c, http.StatusOK, "user profile retrieved successfully", profile)
+}
+
 // UploadCV godoc
 // @Summary      Upload CV
 // @Description  Upload a CV file (PDF, max 5MB) for the currently authenticated user
