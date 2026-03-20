@@ -200,3 +200,61 @@ func TestUserHandler_UpdateMe(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rec.Code)
 	})
 }
+
+func TestUserHandler_GetProfile(t *testing.T) {
+	e := setupEcho()
+	mockService := new(MockUserService)
+	handler := NewUserHandler(mockService, e.Validator)
+
+	t.Run("successful retrieval", func(t *testing.T) {
+		userID := int32(1)
+		expectedProfile := &domain.UserProfile{
+			UserId:          userID,
+			FullName:        "John Doe",
+			CurrentJob:      "Backend Developer",
+			ExperienceLevel: "intermediate",
+			Goals:           []string{"Career growth"},
+		}
+
+		mockService.On("GetUserProfile", mock.Anything, userID).Return(expectedProfile, nil).Once()
+
+		req := httptest.NewRequest(http.MethodGet, "/users/profile", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user_id", userID)
+
+		err := handler.GetProfile(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusOK, rec.Code)
+		mockService.AssertExpectations(t)
+	})
+
+	t.Run("unauthorized - missing user_id", func(t *testing.T) {
+		req := httptest.NewRequest(http.MethodGet, "/users/profile", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		err := handler.GetProfile(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	})
+
+	t.Run("profile not found", func(t *testing.T) {
+		userID := int32(999)
+
+		mockService.On("GetUserProfile", mock.Anything, userID).Return(nil, domain.ErrUserNotFound).Once()
+
+		req := httptest.NewRequest(http.MethodGet, "/users/profile", nil)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+		c.Set("user_id", userID)
+
+		err := handler.GetProfile(c)
+
+		require.NoError(t, err)
+		assert.Equal(t, http.StatusNotFound, rec.Code)
+		mockService.AssertExpectations(t)
+	})
+}
