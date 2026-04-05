@@ -569,7 +569,7 @@ const docTemplate = `{
                         "BearerAuth": []
                     }
                 ],
-                "description": "Fetches jobs from SerpApi based on user profile (job title + experience level). Returns cached results if fetched within 24 hours.",
+                "description": "Fetches jobs from SerpApi based on user profile (job title + experience level). Optional query param ` + "`" + `location` + "`" + ` (e.g. Austin, TX or United States) is passed to SerpApi as the job location filter. Returns cached results if fetched within 24 hours for the same location.",
                 "produces": [
                     "application/json"
                 ],
@@ -577,6 +577,14 @@ const docTemplate = `{
                     "job-search"
                 ],
                 "summary": "Get recommended jobs",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Job location filter (e.g. Seattle, WA) — forwarded to SerpApi Google Jobs",
+                        "name": "location",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -2552,6 +2560,12 @@ const docTemplate = `{
                     "items": {
                         "type": "string"
                     }
+                },
+                "has_cv": {
+                    "type": "boolean"
+                },
+                "job_search_location": {
+                    "type": "string"
                 },
                 "updated_at": {
                     "type": "string"
