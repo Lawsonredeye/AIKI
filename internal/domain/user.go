@@ -26,6 +26,7 @@ type UserProfile struct {
 	ExperienceLevel     string    `json:"experience_level"`
 	Goals               []string  `json:"goals"`
 	JobSearchLocation   string    `json:"job_search_location,omitempty"`
+	HasCV               bool      `json:"has_cv"`
 	UpdatedAt           time.Time `json:"updated_at"`
 }
 

@@ -274,6 +274,7 @@ func (r *userRepository) CreateUserProfile(ctx context.Context, userId int32, fu
 		ExperienceLevel:   experience,
 		Goals:             profile.Goals,
 		JobSearchLocation: profile.JobSearchLocation,
+		HasCV:             len(profile.Cv) > 0,
 		UpdatedAt:         profile.UpdatedAt.Time,
 	}, nil
 }
@@ -305,6 +306,7 @@ func (r *userRepository) GetUserProfileByID(ctx context.Context, userId int32) (
 		ExperienceLevel:   experience,
 		Goals:             profile.Goals,
 		JobSearchLocation: profile.JobSearchLocation,
+		HasCV:             len(profile.Cv) > 0,
 		UpdatedAt:         profile.UpdatedAt.Time,
 	}, nil
 }
@@ -335,6 +337,7 @@ func (r *userRepository) UpdateUserProfile(ctx context.Context, userId int32, fu
 		ExperienceLevel:   *profile.ExperienceLevel,
 		Goals:             profile.Goals,
 		JobSearchLocation: profile.JobSearchLocation,
+		HasCV:             len(profile.Cv) > 0,
 		UpdatedAt:         profile.UpdatedAt.Time,
 	}, nil
 }

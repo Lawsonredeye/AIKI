@@ -363,6 +363,10 @@ definitions:
         items:
           type: string
         type: array
+      has_cv:
+        type: boolean
+      job_search_location:
+        type: string
       updated_at:
         type: string
       user_id:
@@ -858,7 +862,15 @@ paths:
   /jobs/recommended:
     get:
       description: Fetches jobs from SerpApi based on user profile (job title + experience
-        level). Returns cached results if fetched within 24 hours.
+        level). Optional query param `location` (e.g. Austin, TX or United States)
+        is passed to SerpApi as the job location filter. Returns cached results if
+        fetched within 24 hours for the same location.
+      parameters:
+      - description: Job location filter (e.g. Seattle, WA) — forwarded to SerpApi
+          Google Jobs
+        in: query
+        name: location
+        type: string
       produces:
       - application/json
       responses:
